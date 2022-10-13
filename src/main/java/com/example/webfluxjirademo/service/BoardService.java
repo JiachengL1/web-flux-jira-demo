@@ -2,6 +2,8 @@ package com.example.webfluxjirademo.service;
 
 import com.example.webfluxjirademo.domain.board.Board;
 import com.example.webfluxjirademo.domain.board.Boards;
+import com.example.webfluxjirademo.exception.BoardNotFoundException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
@@ -28,6 +30,7 @@ public class BoardService {
         return webClient.get()
                 .uri("/" + id)
                 .retrieve()
+                .onStatus(HttpStatus::is4xxClientError, response -> Mono.error(BoardNotFoundException::new))
                 .bodyToMono(Board.class);
     }
 }
