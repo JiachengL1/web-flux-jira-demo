@@ -25,6 +25,9 @@ public class BoardService {
     }
 
     public Mono<Board> findBoardById(int id) {
-        return null;
+        return webClient.get()
+                .uri("/" + id)
+                .retrieve()
+                .bodyToMono(Board.class);
     }
 }

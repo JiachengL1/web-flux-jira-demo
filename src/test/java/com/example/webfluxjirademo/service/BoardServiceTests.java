@@ -2,6 +2,7 @@ package com.example.webfluxjirademo.service;
 
 import com.example.webfluxjirademo.domain.board.Board;
 import com.example.webfluxjirademo.domain.board.Boards;
+import com.example.webfluxjirademo.domain.board.Location;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -52,5 +53,24 @@ class BoardServiceTests {
         verify(requestHeadersUriSpec).uri("/");
         verify(requestHeadersSpec).retrieve();
         verify(responseSpec).bodyToMono(Boards.class);
+    }
+
+    @Test
+    void shouldFetchBoardDataByIdAndReturnWhole() {
+        Board board = new Board(1, "/board/1", "board1", "simple", new Location());
+        when(webClient.get()).thenReturn(requestHeadersUriSpec);
+        when(requestHeadersUriSpec.uri(anyString())).thenReturn(requestHeadersSpec);
+        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.bodyToMono(Board.class)).thenReturn(Mono.just(board));
+
+        Mono<Board> result = boardService.findBoardById(board.getId());
+
+        StepVerifier.create(result)
+                .expectNextMatches(board::equals)
+                .verifyComplete();
+        verify(webClient).get();
+        verify(requestHeadersUriSpec).uri("/" + board.getId());
+        verify(requestHeadersSpec).retrieve();
+        verify(responseSpec).bodyToMono(Board.class);
     }
 }
