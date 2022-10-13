@@ -3,6 +3,7 @@ package com.example.webfluxjirademo.service;
 import com.example.webfluxjirademo.domain.board.Board;
 import com.example.webfluxjirademo.domain.board.Boards;
 import com.example.webfluxjirademo.domain.board.Location;
+import com.example.webfluxjirademo.exception.BoardNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,8 +18,14 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -61,6 +68,7 @@ class BoardServiceTests {
         when(webClient.get()).thenReturn(requestHeadersUriSpec);
         when(requestHeadersUriSpec.uri(anyString())).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.onStatus(any(Predicate.class), any(Function.class))).thenReturn(responseSpec);
         when(responseSpec.bodyToMono(Board.class)).thenReturn(Mono.just(board));
 
         Mono<Board> result = boardService.findBoardById(board.getId());
@@ -71,6 +79,24 @@ class BoardServiceTests {
         verify(webClient).get();
         verify(requestHeadersUriSpec).uri("/" + board.getId());
         verify(requestHeadersSpec).retrieve();
+        verify(responseSpec).onStatus(any(Predicate.class), any(Function.class));
         verify(responseSpec).bodyToMono(Board.class);
+    }
+
+    @Test
+    void shouldFetchErrorByInvalidIdAndThrowException() {
+        when(webClient.get()).thenReturn(requestHeadersUriSpec);
+        when(requestHeadersUriSpec.uri(anyString())).thenReturn(requestHeadersSpec);
+        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.onStatus(any(Predicate.class), any(Function.class))).thenThrow(BoardNotFoundException.class);
+
+        Throwable throwable = catchThrowable(() -> boardService.findBoardById(1));
+
+        assertThat(throwable).isExactlyInstanceOf(BoardNotFoundException.class);
+        verify(webClient).get();
+        verify(requestHeadersUriSpec).uri("/1");
+        verify(requestHeadersSpec).retrieve();
+        verify(responseSpec).onStatus(any(Predicate.class), any(Function.class));
+        verify(responseSpec, never()).bodyToMono(Board.class);
     }
 }
