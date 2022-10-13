@@ -5,6 +5,7 @@ import com.example.webfluxjirademo.domain.board.Boards;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Service
 public class BoardService {
@@ -21,5 +22,9 @@ public class BoardService {
                 .retrieve()
                 .bodyToMono(Boards.class)
                 .flatMapMany(boards -> Flux.fromIterable(boards.getValues()));
+    }
+
+    public Mono<Board> findBoardById(int id) {
+        return null;
     }
 }
