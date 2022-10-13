@@ -18,6 +18,7 @@ import reactor.test.StepVerifier;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,11 +29,11 @@ class BoardServiceTests {
     @Mock
     private WebClient webClient;
     @Mock
-    RequestHeadersUriSpec requestHeadersUriSpec;
+    private RequestHeadersUriSpec requestHeadersUriSpec;
     @Mock
-    RequestHeadersSpec requestHeadersSpec;
+    private RequestHeadersSpec requestHeadersSpec;
     @Mock
-    ResponseSpec responseSpec;
+    private ResponseSpec responseSpec;
 
     @Test
     void shouldFetchBoardsDataFromJiraAndReturnValues() {
@@ -47,5 +48,9 @@ class BoardServiceTests {
         StepVerifier.create(result)
                 .expectNextMatches(new Board()::equals)
                 .verifyComplete();
+        verify(webClient).get();
+        verify(requestHeadersUriSpec).uri("/");
+        verify(requestHeadersSpec).retrieve();
+        verify(responseSpec).bodyToMono(Boards.class);
     }
 }
