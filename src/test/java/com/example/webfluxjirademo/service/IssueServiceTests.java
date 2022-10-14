@@ -11,6 +11,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClient.RequestHeadersSpec;
+import org.springframework.web.reactive.function.client.WebClient.RequestHeadersUriSpec;
+import org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -36,17 +39,19 @@ class IssueServiceTests {
     @Mock
     private WebClient webClient;
     @Mock
-    private WebClient.RequestHeadersUriSpec requestHeadersUriSpec;
+    private RequestHeadersUriSpec requestHeadersUriSpec;
     @Mock
-    private WebClient.RequestHeadersSpec requestHeadersSpec;
+    private RequestHeadersSpec requestHeadersSpec;
     @Mock
-    private WebClient.ResponseSpec responseSpec;
+    private ResponseSpec responseSpec;
 
     @Test
     void shouldFetchIssuesByBoardIdAndReturnIssueFlux() {
         Issues issues = new Issues("issues", 0, 10, 1, List.of(new Issue()));
+
         basicMockWebClient(issues);
         when(responseSpec.onStatus(any(Predicate.class), any(Function.class))).thenReturn(responseSpec);
+        when(responseSpec.bodyToMono(Issues.class)).thenReturn(Mono.just(issues));
 
         Flux<Issue> result = issueService.findAllIssues(1);
 
@@ -54,7 +59,6 @@ class IssueServiceTests {
                 .expectNextMatches(new Issue()::equals)
                 .verifyComplete();
         basicVerifyWebClient();
-        verify(responseSpec).onStatus(any(Predicate.class), any(Function.class));
     }
 
     @Test
@@ -62,8 +66,10 @@ class IssueServiceTests {
         Issue issue1 = buildIssueByStatus(10001);
         Issue issue2 = buildIssueByStatus(10002);
         Issues issues = new Issues("issues", 0, 10, 1, List.of(issue1, issue2));
+
         basicMockWebClient(issues);
         when(responseSpec.onStatus(any(Predicate.class), any(Function.class))).thenReturn(responseSpec);
+        when(responseSpec.bodyToMono(Issues.class)).thenReturn(Mono.just(issues));
 
         Flux<Issue> result = issueService.findIssuesByStatus(1, 10001);
 
@@ -71,7 +77,6 @@ class IssueServiceTests {
                 .expectNextMatches(issue1::equals)
                 .verifyComplete();
         basicVerifyWebClient();
-        verify(responseSpec).onStatus(any(Predicate.class), any(Function.class));
     }
 
     @Test
@@ -99,13 +104,14 @@ class IssueServiceTests {
         when(webClient.get()).thenReturn(requestHeadersUriSpec);
         when(requestHeadersUriSpec.uri(anyString())).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.bodyToMono(Issues.class)).thenReturn(Mono.just(issues));
+
     }
 
     private void basicVerifyWebClient() {
         verify(webClient).get();
         verify(requestHeadersUriSpec).uri("/board/1/issue");
         verify(requestHeadersSpec).retrieve();
+        verify(responseSpec).onStatus(any(Predicate.class), any(Function.class));
         verify(responseSpec).bodyToMono(Issues.class);
     }
 }
