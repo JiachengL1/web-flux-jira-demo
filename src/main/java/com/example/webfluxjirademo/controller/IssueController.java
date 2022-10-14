@@ -3,10 +3,12 @@ package com.example.webfluxjirademo.controller;
 import com.example.webfluxjirademo.domain.issue.Issue;
 import com.example.webfluxjirademo.service.IssueService;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/issue")
@@ -25,5 +27,10 @@ public class IssueController {
             return issueService.findIssuesByStatus(boardId, statusId);
         }
         return issueService.findAllIssues(boardId);
+    }
+
+    @GetMapping("/{id}")
+    public Mono<Issue> getIssueById(@PathVariable("id") int id) {
+        return issueService.findIssueById(id);
     }
 }
