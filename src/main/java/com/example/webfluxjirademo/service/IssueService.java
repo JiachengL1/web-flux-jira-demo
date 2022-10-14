@@ -24,6 +24,7 @@ public class IssueService {
     }
 
     public Flux<Issue> findIssuesByStatus(int boardId, int statusId) {
-        return null;
+        return findAllIssues(boardId)
+                .filter(issue -> issue.getFields().getStatus().getId() == statusId);
     }
 }
