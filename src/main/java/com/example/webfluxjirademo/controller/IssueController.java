@@ -19,7 +19,11 @@ public class IssueController {
     }
 
     @GetMapping
-    public Flux<Issue> getAllIssues(@RequestParam("boardId") int boardId) {
+    public Flux<Issue> getAllIssues(@RequestParam("boardId") int boardId,
+                                    @RequestParam("statusId") int statusId) {
+        if (statusId != 0) {
+            return issueService.findIssuesByStatus(boardId, statusId);
+        }
         return issueService.findAllIssues(boardId);
     }
 }
