@@ -33,6 +33,9 @@ public class IssueService {
     }
 
     public Mono<Issue> findIssueById(int id) {
-        return null;
+        return webClient.get()
+                .uri("/issue/" + id)
+                .retrieve()
+                .bodyToMono(Issue.class);
     }
 }
