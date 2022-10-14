@@ -46,9 +46,7 @@ class BoardServiceTests {
     @Test
     void shouldFetchBoardsDataFromJiraAndReturnValues() {
         Boards boards = new Boards(1, 1, 1, true, List.of(new Board()));
-        when(webClient.get()).thenReturn(requestHeadersUriSpec);
-        when(requestHeadersUriSpec.uri(anyString())).thenReturn(requestHeadersSpec);
-        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        basicMockWebClient();
         when(responseSpec.bodyToMono(Boards.class)).thenReturn(Mono.just(boards));
 
         Flux<Board> result = boardService.findAllBoards();
@@ -56,18 +54,14 @@ class BoardServiceTests {
         StepVerifier.create(result)
                 .expectNextMatches(new Board()::equals)
                 .verifyComplete();
-        verify(webClient).get();
-        verify(requestHeadersUriSpec).uri("/board");
-        verify(requestHeadersSpec).retrieve();
+        basicVerifyWebClient("/board");
         verify(responseSpec).bodyToMono(Boards.class);
     }
 
     @Test
     void shouldFetchBoardDataByIdAndReturnWhole() {
         Board board = new Board(1, "/board/1", "board1", "simple", new Location());
-        when(webClient.get()).thenReturn(requestHeadersUriSpec);
-        when(requestHeadersUriSpec.uri(anyString())).thenReturn(requestHeadersSpec);
-        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        basicMockWebClient();
         when(responseSpec.onStatus(any(Predicate.class), any(Function.class))).thenReturn(responseSpec);
         when(responseSpec.bodyToMono(Board.class)).thenReturn(Mono.just(board));
 
@@ -76,27 +70,33 @@ class BoardServiceTests {
         StepVerifier.create(result)
                 .expectNextMatches(board::equals)
                 .verifyComplete();
-        verify(webClient).get();
-        verify(requestHeadersUriSpec).uri("/board/" + board.getId());
-        verify(requestHeadersSpec).retrieve();
+        basicVerifyWebClient("/board/" + board.getId());
         verify(responseSpec).onStatus(any(Predicate.class), any(Function.class));
         verify(responseSpec).bodyToMono(Board.class);
     }
 
     @Test
     void shouldFetchErrorByInvalidIdAndThrowException() {
-        when(webClient.get()).thenReturn(requestHeadersUriSpec);
-        when(requestHeadersUriSpec.uri(anyString())).thenReturn(requestHeadersSpec);
-        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        basicMockWebClient();
         when(responseSpec.onStatus(any(Predicate.class), any(Function.class))).thenThrow(BoardNotFoundException.class);
 
         Throwable throwable = catchThrowable(() -> boardService.findBoardById(1));
 
         assertThat(throwable).isExactlyInstanceOf(BoardNotFoundException.class);
-        verify(webClient).get();
-        verify(requestHeadersUriSpec).uri("/board/1");
-        verify(requestHeadersSpec).retrieve();
+        basicVerifyWebClient("/board/1");
         verify(responseSpec).onStatus(any(Predicate.class), any(Function.class));
         verify(responseSpec, never()).bodyToMono(Board.class);
+    }
+
+    private void basicMockWebClient() {
+        when(webClient.get()).thenReturn(requestHeadersUriSpec);
+        when(requestHeadersUriSpec.uri(anyString())).thenReturn(requestHeadersSpec);
+        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+    }
+
+    private void basicVerifyWebClient(String uri) {
+        verify(webClient).get();
+        verify(requestHeadersUriSpec).uri(uri);
+        verify(requestHeadersSpec).retrieve();
     }
 }
