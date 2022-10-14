@@ -1,7 +1,9 @@
 package com.example.webfluxjirademo.service;
 
+import com.example.webfluxjirademo.domain.issue.Fields;
 import com.example.webfluxjirademo.domain.issue.Issue;
 import com.example.webfluxjirademo.domain.issue.Issues;
+import com.example.webfluxjirademo.domain.status.Status;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,8 +35,8 @@ class IssueServiceTests {
     private WebClient.ResponseSpec responseSpec;
 
     @Test
-    void shouldFetchIssuesDataByBoardIdAndReturnIssueList() {
-        Issues issues = new Issues("item", 0, 10, 1, List.of(new Issue()));
+    void shouldFetchIssuesByBoardIdAndReturnIssueFlux() {
+        Issues issues = new Issues("issues", 0, 10, 1, List.of(new Issue()));
         when(webClient.get()).thenReturn(requestHeadersUriSpec);
         when(requestHeadersUriSpec.uri(anyString())).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
@@ -49,5 +51,34 @@ class IssueServiceTests {
         verify(requestHeadersUriSpec).uri("/board/1/issue");
         verify(requestHeadersSpec).retrieve();
         verify(responseSpec).bodyToMono(Issues.class);
+    }
+
+    @Test
+    void shouldFetchIssuesAndReturnFilteredIssueFluxByStatusId() {
+        Issue issue1 = buildIssueByStatus(10001);
+        Issue issue2 = buildIssueByStatus(10002);
+        Issues issues = new Issues("issues", 0, 10, 1, List.of(issue1, issue2));
+
+        when(webClient.get()).thenReturn(requestHeadersUriSpec);
+        when(requestHeadersUriSpec.uri(anyString())).thenReturn(requestHeadersSpec);
+        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.bodyToMono(Issues.class)).thenReturn(Mono.just(issues));
+
+        Flux<Issue> result = issueService.findIssuesByStatus(1, 10001);
+
+        StepVerifier.create(result)
+                .expectNextMatches(issue1::equals)
+                .verifyComplete();
+        verify(webClient).get();
+        verify(requestHeadersUriSpec).uri("/board/1/issue");
+        verify(requestHeadersSpec).retrieve();
+        verify(responseSpec).bodyToMono(Issues.class);
+    }
+
+    private Issue buildIssueByStatus(int statusId) {
+        Status status = new Status();
+        status.setId(statusId);
+        Fields fields = Fields.builder().status(status).build();
+        return new Issue("issue", 1, "issue1", "web", fields);
     }
 }
