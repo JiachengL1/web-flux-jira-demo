@@ -35,4 +35,19 @@ class IssueControllerTests {
                 .contains(issue);
         verify(issueService).findAllIssues(1);
     }
+
+    @Test
+    void shouldGetIssuesByStatusWhenRequestWithStatusId() {
+        Issue issue = new Issue("item", 1, "example.com", "web", new Fields());
+        when(issueService.findIssuesByStatus(1, 10001)).thenReturn(Flux.just(issue));
+
+        webTestClient.get()
+                .uri("http://localhost:8080/issue?boardId=1&statusId=10001")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(Issue.class)
+                .hasSize(1)
+                .contains(issue);
+        verify(issueService).findIssuesByStatus(1, 10001);
+    }
 }

@@ -22,4 +22,8 @@ public class IssueService {
                 .bodyToMono(Issues.class)
                 .flatMapMany(issues -> Flux.fromIterable(issues.getIssues()));
     }
+
+    public Flux<Issue> findIssuesByStatus(int boardId, int statusId) {
+        return null;
+    }
 }
