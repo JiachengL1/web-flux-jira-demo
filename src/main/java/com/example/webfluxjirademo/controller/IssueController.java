@@ -20,8 +20,8 @@ public class IssueController {
 
     @GetMapping
     public Flux<Issue> getAllIssues(@RequestParam("boardId") int boardId,
-                                    @RequestParam("statusId") int statusId) {
-        if (statusId != 0) {
+                                    @RequestParam(value = "statusId", defaultValue = "-1") int statusId) {
+        if (statusId != -1) {
             return issueService.findIssuesByStatus(boardId, statusId);
         }
         return issueService.findAllIssues(boardId);
