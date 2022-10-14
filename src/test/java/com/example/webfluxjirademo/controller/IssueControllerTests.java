@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -49,5 +50,19 @@ class IssueControllerTests {
                 .hasSize(1)
                 .contains(issue);
         verify(issueService).findIssuesByStatus(1, 10001);
+    }
+
+    @Test
+    void shouldGetSpecificIssueWhenRequestWithId() {
+        Issue issue = new Issue("item", 1, "example.com", "web", new Fields());
+        when(issueService.findIssueById(issue.getId())).thenReturn(Mono.just(issue));
+
+        webTestClient.get()
+                .uri("http://localhost:8080/issue/" + issue.getId())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Issue.class)
+                .isEqualTo(issue);
+        verify(issueService).findIssueById(issue.getId());
     }
 }

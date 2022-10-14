@@ -31,4 +31,8 @@ public class IssueService {
         return findAllIssues(boardId)
                 .filter(issue -> issue.getFields().getStatus().getId() == statusId);
     }
+
+    public Mono<Issue> findIssueById(int id) {
+        return null;
+    }
 }
