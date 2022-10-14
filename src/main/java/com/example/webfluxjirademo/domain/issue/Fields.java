@@ -1,9 +1,11 @@
 package com.example.webfluxjirademo.domain.issue;
 
+import com.example.webfluxjirademo.config.InstantFormatConfig;
 import com.example.webfluxjirademo.domain.Project;
 import com.example.webfluxjirademo.domain.User;
 import com.example.webfluxjirademo.domain.comment.Comment;
 import com.example.webfluxjirademo.domain.status.Status;
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,12 +24,13 @@ public class Fields {
     private String summary;
     private String description;
     private boolean flagged;
-    private double customfield_10016;
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ", timezone = "Asia/Shanghai")
+    @JsonAlias("customfield_10016")
+    private double storyPoint;
+    @JsonFormat(pattern = InstantFormatConfig.PATTERN, timezone = InstantFormatConfig.TIMEZONE)
     private Instant lastViewed;
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ", timezone = "Asia/Shanghai")
+    @JsonFormat(pattern = InstantFormatConfig.PATTERN, timezone = InstantFormatConfig.TIMEZONE)
     private Instant created;
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ", timezone = "Asia/Shanghai")
+    @JsonFormat(pattern = InstantFormatConfig.PATTERN, timezone = InstantFormatConfig.TIMEZONE)
     private Instant updated;
     private User creator;
     private User reporter;

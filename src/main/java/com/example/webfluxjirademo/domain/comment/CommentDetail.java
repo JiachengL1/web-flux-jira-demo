@@ -1,5 +1,6 @@
 package com.example.webfluxjirademo.domain.comment;
 
+import com.example.webfluxjirademo.config.InstantFormatConfig;
 import com.example.webfluxjirademo.domain.User;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
@@ -17,9 +18,9 @@ public class CommentDetail {
     private String self;
     private String body;
     private boolean jsdPublic;
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ", timezone = "Asia/Shanghai")
+    @JsonFormat(pattern = InstantFormatConfig.PATTERN, timezone = InstantFormatConfig.TIMEZONE)
     private Instant created;
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ", timezone = "Asia/Shanghai")
+    @JsonFormat(pattern = InstantFormatConfig.PATTERN, timezone = InstantFormatConfig.TIMEZONE)
     private Instant updated;
     private User author;
     private User updateAuthor;

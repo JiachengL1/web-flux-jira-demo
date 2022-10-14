@@ -37,20 +37,14 @@ class IssueServiceTests {
     @Test
     void shouldFetchIssuesByBoardIdAndReturnIssueFlux() {
         Issues issues = new Issues("issues", 0, 10, 1, List.of(new Issue()));
-        when(webClient.get()).thenReturn(requestHeadersUriSpec);
-        when(requestHeadersUriSpec.uri(anyString())).thenReturn(requestHeadersSpec);
-        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.bodyToMono(Issues.class)).thenReturn(Mono.just(issues));
+        basicMockWebClient(issues);
 
         Flux<Issue> result = issueService.findAllIssues(1);
 
         StepVerifier.create(result)
                 .expectNextMatches(new Issue()::equals)
                 .verifyComplete();
-        verify(webClient).get();
-        verify(requestHeadersUriSpec).uri("/board/1/issue");
-        verify(requestHeadersSpec).retrieve();
-        verify(responseSpec).bodyToMono(Issues.class);
+        basicVerifyWebClient();
     }
 
     @Test
@@ -59,20 +53,14 @@ class IssueServiceTests {
         Issue issue2 = buildIssueByStatus(10002);
         Issues issues = new Issues("issues", 0, 10, 1, List.of(issue1, issue2));
 
-        when(webClient.get()).thenReturn(requestHeadersUriSpec);
-        when(requestHeadersUriSpec.uri(anyString())).thenReturn(requestHeadersSpec);
-        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.bodyToMono(Issues.class)).thenReturn(Mono.just(issues));
+        basicMockWebClient(issues);
 
         Flux<Issue> result = issueService.findIssuesByStatus(1, 10001);
 
         StepVerifier.create(result)
                 .expectNextMatches(issue1::equals)
                 .verifyComplete();
-        verify(webClient).get();
-        verify(requestHeadersUriSpec).uri("/board/1/issue");
-        verify(requestHeadersSpec).retrieve();
-        verify(responseSpec).bodyToMono(Issues.class);
+        basicVerifyWebClient();
     }
 
     private Issue buildIssueByStatus(int statusId) {
@@ -80,5 +68,19 @@ class IssueServiceTests {
         status.setId(statusId);
         Fields fields = Fields.builder().status(status).build();
         return new Issue("issue", 1, "issue1", "web", fields);
+    }
+
+    private void basicMockWebClient(Issues issues) {
+        when(webClient.get()).thenReturn(requestHeadersUriSpec);
+        when(requestHeadersUriSpec.uri(anyString())).thenReturn(requestHeadersSpec);
+        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.bodyToMono(Issues.class)).thenReturn(Mono.just(issues));
+    }
+
+    private void basicVerifyWebClient() {
+        verify(webClient).get();
+        verify(requestHeadersUriSpec).uri("/board/1/issue");
+        verify(requestHeadersSpec).retrieve();
+        verify(responseSpec).bodyToMono(Issues.class);
     }
 }
