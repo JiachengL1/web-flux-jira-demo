@@ -4,6 +4,7 @@ import com.example.webfluxjirademo.domain.issue.Fields;
 import com.example.webfluxjirademo.domain.issue.Issue;
 import com.example.webfluxjirademo.domain.issue.Issues;
 import com.example.webfluxjirademo.domain.status.Status;
+import com.example.webfluxjirademo.exception.BoardNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -15,8 +16,15 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -38,6 +46,7 @@ class IssueServiceTests {
     void shouldFetchIssuesByBoardIdAndReturnIssueFlux() {
         Issues issues = new Issues("issues", 0, 10, 1, List.of(new Issue()));
         basicMockWebClient(issues);
+        when(responseSpec.onStatus(any(Predicate.class), any(Function.class))).thenReturn(responseSpec);
 
         Flux<Issue> result = issueService.findAllIssues(1);
 
@@ -45,6 +54,7 @@ class IssueServiceTests {
                 .expectNextMatches(new Issue()::equals)
                 .verifyComplete();
         basicVerifyWebClient();
+        verify(responseSpec).onStatus(any(Predicate.class), any(Function.class));
     }
 
     @Test
@@ -52,8 +62,8 @@ class IssueServiceTests {
         Issue issue1 = buildIssueByStatus(10001);
         Issue issue2 = buildIssueByStatus(10002);
         Issues issues = new Issues("issues", 0, 10, 1, List.of(issue1, issue2));
-
         basicMockWebClient(issues);
+        when(responseSpec.onStatus(any(Predicate.class), any(Function.class))).thenReturn(responseSpec);
 
         Flux<Issue> result = issueService.findIssuesByStatus(1, 10001);
 
@@ -61,6 +71,21 @@ class IssueServiceTests {
                 .expectNextMatches(issue1::equals)
                 .verifyComplete();
         basicVerifyWebClient();
+        verify(responseSpec).onStatus(any(Predicate.class), any(Function.class));
+    }
+
+    @Test
+    void shouldFetchErrorByInvalidBoardIdAndThrowException() {
+        basicMockWebClient(new Issues());
+        when(responseSpec.onStatus(any(Predicate.class), any(Function.class))).thenThrow(BoardNotFoundException.class);
+
+        Throwable allThrowable = catchThrowable(() -> issueService.findAllIssues(1));
+        Throwable statusThrowable = catchThrowable(() -> issueService.findIssuesByStatus(1, 10001));
+
+        assertThat(allThrowable).isExactlyInstanceOf(BoardNotFoundException.class);
+        assertThat(statusThrowable).isExactlyInstanceOf(BoardNotFoundException.class);
+        verify(responseSpec, times(2)).onStatus(any(Predicate.class), any(Function.class));
+        verify(responseSpec, never()).bodyToMono(Issues.class);
     }
 
     private Issue buildIssueByStatus(int statusId) {
