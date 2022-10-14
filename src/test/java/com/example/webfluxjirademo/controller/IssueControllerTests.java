@@ -1,5 +1,6 @@
 package com.example.webfluxjirademo.controller;
 
+import com.example.webfluxjirademo.domain.issue.Fields;
 import com.example.webfluxjirademo.domain.issue.Issue;
 import com.example.webfluxjirademo.service.IssueService;
 import org.junit.jupiter.api.Test;
@@ -22,7 +23,7 @@ class IssueControllerTests {
 
     @Test
     void shouldGetAllIssuesWhenRequestWithBoardId() {
-        Issue issue = Issue.builder().id(1).key("web").summary("title").description("content").build();
+        Issue issue = new Issue("item", 1, "example.com", "web", new Fields());
         when(issueService.findAllIssues(1)).thenReturn(Flux.just(issue));
 
         webTestClient.get()

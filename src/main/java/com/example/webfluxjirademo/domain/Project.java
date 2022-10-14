@@ -1,4 +1,4 @@
-package com.example.webfluxjirademo.domain.issue;
+package com.example.webfluxjirademo.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,11 +7,11 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Issue {
+public class Project {
 
-    private String expand;
     private int id;
     private String self;
     private String key;
-    private Fields fields;
+    private String name;
+    private String projectTypeKey;
 }
