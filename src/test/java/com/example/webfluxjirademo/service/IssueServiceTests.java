@@ -19,17 +19,16 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.List;
-import java.util.function.Function;
-import java.util.function.Predicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class IssueServiceTests {
@@ -39,9 +38,9 @@ class IssueServiceTests {
     @Mock
     private WebClient webClient;
     @Mock
-    private RequestHeadersUriSpec requestHeadersUriSpec;
+    private RequestHeadersUriSpec<?> requestHeadersUriSpec;
     @Mock
-    private RequestHeadersSpec requestHeadersSpec;
+    private RequestHeadersSpec<?> requestHeadersSpec;
     @Mock
     private ResponseSpec responseSpec;
 
@@ -49,9 +48,9 @@ class IssueServiceTests {
     void shouldFetchIssuesByBoardIdAndReturnIssueFlux() {
         Issues issues = new Issues("issues", 0, 10, 1, List.of(new Issue()));
 
-        basicMockWebClient(issues);
-        when(responseSpec.onStatus(any(Predicate.class), any(Function.class))).thenReturn(responseSpec);
-        when(responseSpec.bodyToMono(Issues.class)).thenReturn(Mono.just(issues));
+        basicMockWebClient();
+        doReturn(responseSpec).when(responseSpec).onStatus(any(), any());
+        doReturn(Mono.just(issues)).when(responseSpec).bodyToMono(Issues.class);
 
         Flux<Issue> result = issueService.findAllIssues(1);
 
@@ -59,6 +58,8 @@ class IssueServiceTests {
                 .expectNextMatches(new Issue()::equals)
                 .verifyComplete();
         basicVerifyWebClient();
+        verify(responseSpec).onStatus(any(), any());
+        verify(responseSpec).bodyToMono(Issues.class);
     }
 
     @Test
@@ -67,9 +68,9 @@ class IssueServiceTests {
         Issue issue2 = buildIssueByStatus(10002);
         Issues issues = new Issues("issues", 0, 10, 1, List.of(issue1, issue2));
 
-        basicMockWebClient(issues);
-        when(responseSpec.onStatus(any(Predicate.class), any(Function.class))).thenReturn(responseSpec);
-        when(responseSpec.bodyToMono(Issues.class)).thenReturn(Mono.just(issues));
+        basicMockWebClient();
+        doReturn(responseSpec).when(responseSpec).onStatus(any(), any());
+        doReturn(Mono.just(issues)).when(responseSpec).bodyToMono(Issues.class);
 
         Flux<Issue> result = issueService.findIssuesByStatus(1, 10001);
 
@@ -77,19 +78,21 @@ class IssueServiceTests {
                 .expectNextMatches(issue1::equals)
                 .verifyComplete();
         basicVerifyWebClient();
+        verify(responseSpec).onStatus(any(), any());
+        verify(responseSpec).bodyToMono(Issues.class);
     }
 
     @Test
     void shouldFetchErrorByInvalidBoardIdAndThrowException() {
-        basicMockWebClient(new Issues());
-        when(responseSpec.onStatus(any(Predicate.class), any(Function.class))).thenThrow(BoardNotFoundException.class);
+        basicMockWebClient();
+        doThrow(BoardNotFoundException.class).when(responseSpec).onStatus(any(), any());
 
         Throwable allThrowable = catchThrowable(() -> issueService.findAllIssues(1));
         Throwable statusThrowable = catchThrowable(() -> issueService.findIssuesByStatus(1, 10001));
 
         assertThat(allThrowable).isExactlyInstanceOf(BoardNotFoundException.class);
         assertThat(statusThrowable).isExactlyInstanceOf(BoardNotFoundException.class);
-        verify(responseSpec, times(2)).onStatus(any(Predicate.class), any(Function.class));
+        verify(responseSpec, times(2)).onStatus(any(), any());
         verify(responseSpec, never()).bodyToMono(Issues.class);
     }
 
@@ -100,18 +103,15 @@ class IssueServiceTests {
         return new Issue("issue", 1, "issue1", "web", fields);
     }
 
-    private void basicMockWebClient(Issues issues) {
-        when(webClient.get()).thenReturn(requestHeadersUriSpec);
-        when(requestHeadersUriSpec.uri(anyString())).thenReturn(requestHeadersSpec);
-        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
-
+    private void basicMockWebClient() {
+        doReturn(requestHeadersUriSpec).when(webClient).get();
+        doReturn(requestHeadersSpec).when(requestHeadersUriSpec).uri(anyString());
+        doReturn(responseSpec).when(requestHeadersSpec).retrieve();
     }
 
     private void basicVerifyWebClient() {
         verify(webClient).get();
         verify(requestHeadersUriSpec).uri("/board/1/issue");
         verify(requestHeadersSpec).retrieve();
-        verify(responseSpec).onStatus(any(Predicate.class), any(Function.class));
-        verify(responseSpec).bodyToMono(Issues.class);
     }
 }
