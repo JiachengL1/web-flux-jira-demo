@@ -57,7 +57,7 @@ class IssueServiceTests {
         StepVerifier.create(result)
                 .expectNextMatches(new Issue()::equals)
                 .verifyComplete();
-        basicVerifyWebClient();
+        basicVerifyWebClient("/board/1/issue");
         verify(responseSpec).onStatus(any(), any());
         verify(responseSpec).bodyToMono(Issues.class);
     }
@@ -77,7 +77,7 @@ class IssueServiceTests {
         StepVerifier.create(result)
                 .expectNextMatches(issue1::equals)
                 .verifyComplete();
-        basicVerifyWebClient();
+        basicVerifyWebClient("/board/1/issue");
         verify(responseSpec).onStatus(any(), any());
         verify(responseSpec).bodyToMono(Issues.class);
     }
@@ -96,6 +96,22 @@ class IssueServiceTests {
         verify(responseSpec, never()).bodyToMono(Issues.class);
     }
 
+    @Test
+    void shouldFetchIssueAndReturnWhole() {
+        Issue issue = buildIssueByStatus(10001);
+
+        basicMockWebClient();
+        doReturn(Mono.just(issue)).when(responseSpec).bodyToMono(Issue.class);
+
+        Mono<Issue> result = issueService.findIssueById(issue.getId());
+
+        StepVerifier.create(result)
+                .expectNextMatches(issue::equals)
+                .verifyComplete();
+        basicVerifyWebClient("/issue/" + issue.getId());
+        verify(responseSpec).bodyToMono(Issue.class);
+    }
+
     private Issue buildIssueByStatus(int statusId) {
         Status status = new Status();
         status.setId(statusId);
@@ -109,9 +125,9 @@ class IssueServiceTests {
         doReturn(responseSpec).when(requestHeadersSpec).retrieve();
     }
 
-    private void basicVerifyWebClient() {
+    private void basicVerifyWebClient(String uri) {
         verify(webClient).get();
-        verify(requestHeadersUriSpec).uri("/board/1/issue");
+        verify(requestHeadersUriSpec).uri(uri);
         verify(requestHeadersSpec).retrieve();
     }
 }
