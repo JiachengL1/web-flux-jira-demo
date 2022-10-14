@@ -20,7 +20,7 @@ public class BoardService {
 
     public Flux<Board> findAllBoards() {
         return webClient.get()
-                .uri("/")
+                .uri("/board")
                 .retrieve()
                 .bodyToMono(Boards.class)
                 .flatMapMany(boards -> Flux.fromIterable(boards.getValues()));
@@ -28,7 +28,7 @@ public class BoardService {
 
     public Mono<Board> findBoardById(int id) {
         return webClient.get()
-                .uri("/" + id)
+                .uri("/board/" + id)
                 .retrieve()
                 .onStatus(HttpStatus::is4xxClientError, response -> Mono.error(BoardNotFoundException::new))
                 .bodyToMono(Board.class);

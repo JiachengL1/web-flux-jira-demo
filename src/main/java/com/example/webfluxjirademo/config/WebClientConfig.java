@@ -11,7 +11,7 @@ public class WebClientConfig {
 
     @Bean
     public WebClient webClient() {
-        final String baseUrl = "https://jiacheng-li.atlassian.net/rest/agile/1.0/board";
+        final String baseUrl = "https://jiacheng-li.atlassian.net/rest/agile/1.0";
         final String basicAuth = "Basic amlhY2hlbmcubGlAdGhvdWdodHdvcmtzLmNvbTprRmM5b1h3UmdLZEpYNXpzUGtCNkVDQ0Y=";
 
         return WebClient.builder()

@@ -57,7 +57,7 @@ class BoardServiceTests {
                 .expectNextMatches(new Board()::equals)
                 .verifyComplete();
         verify(webClient).get();
-        verify(requestHeadersUriSpec).uri("/");
+        verify(requestHeadersUriSpec).uri("/board");
         verify(requestHeadersSpec).retrieve();
         verify(responseSpec).bodyToMono(Boards.class);
     }
@@ -77,7 +77,7 @@ class BoardServiceTests {
                 .expectNextMatches(board::equals)
                 .verifyComplete();
         verify(webClient).get();
-        verify(requestHeadersUriSpec).uri("/" + board.getId());
+        verify(requestHeadersUriSpec).uri("/board/" + board.getId());
         verify(requestHeadersSpec).retrieve();
         verify(responseSpec).onStatus(any(Predicate.class), any(Function.class));
         verify(responseSpec).bodyToMono(Board.class);
@@ -94,7 +94,7 @@ class BoardServiceTests {
 
         assertThat(throwable).isExactlyInstanceOf(BoardNotFoundException.class);
         verify(webClient).get();
-        verify(requestHeadersUriSpec).uri("/1");
+        verify(requestHeadersUriSpec).uri("/board/1");
         verify(requestHeadersSpec).retrieve();
         verify(responseSpec).onStatus(any(Predicate.class), any(Function.class));
         verify(responseSpec, never()).bodyToMono(Board.class);
