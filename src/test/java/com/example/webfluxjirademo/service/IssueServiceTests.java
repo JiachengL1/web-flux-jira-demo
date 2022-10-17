@@ -1,5 +1,8 @@
 package com.example.webfluxjirademo.service;
 
+import com.example.webfluxjirademo.domain.User;
+import com.example.webfluxjirademo.domain.comment.Comment;
+import com.example.webfluxjirademo.domain.comment.CommentDetail;
 import com.example.webfluxjirademo.domain.issue.Fields;
 import com.example.webfluxjirademo.domain.issue.Issue;
 import com.example.webfluxjirademo.domain.issue.Issues;
@@ -18,6 +21,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.time.Instant;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -112,9 +116,29 @@ class IssueServiceTests {
         verify(responseSpec).bodyToMono(Issue.class);
     }
 
+    @Test
+    void shouldFetchIssueAndReturnCommentsPage() {
+        Issue issue = buildIssueByStatus(10001);
+        CommentDetail commentDetail = new CommentDetail(1, "example.com", "my comment",
+                true, Instant.EPOCH, Instant.EPOCH, new User(), new User());
+        issue.getFields().setComment(new Comment(List.of(commentDetail)));
+
+        basicMockWebClient();
+        doReturn(Mono.just(issue)).when(responseSpec).bodyToMono(Issue.class);
+
+        Flux<CommentDetail> result = issueService.findIssueCommentsById(issue.getId(), 5, 1);
+
+        StepVerifier.create(result)
+                .expectNextMatches(commentDetail::equals)
+                .verifyComplete();
+        basicVerifyWebClient("/issue/" + issue.getId());
+        verify(responseSpec).bodyToMono(Issue.class);
+    }
+
     private Issue buildIssueByStatus(int statusId) {
         Status status = new Status();
         status.setId(statusId);
+
         Fields fields = Fields.builder().status(status).build();
         return new Issue("issue", 1, "issue1", "web", fields);
     }
