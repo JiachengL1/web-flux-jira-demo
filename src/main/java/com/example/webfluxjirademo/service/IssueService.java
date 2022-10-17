@@ -33,7 +33,7 @@ public class IssueService {
                 .filter(issue -> issue.getFields().getStatus().getId() == statusId);
     }
 
-    public Flux<Issue> findIssuesByPoint(int boardId, int point) {
+    public Flux<Issue> findIssuesByPoint(int boardId, double point) {
         return null;
     }
 

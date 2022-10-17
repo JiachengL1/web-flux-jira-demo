@@ -25,7 +25,7 @@ public class IssueController {
     public Flux<Issue> getAllIssues(
             @RequestParam("boardId") int boardId,
             @RequestParam(value = "statusId", defaultValue = "-1") int statusId,
-            @RequestParam(value = "point", defaultValue = "-1") int point) {
+            @RequestParam(value = "point", defaultValue = "-1") double point) {
         if (statusId != -1) {
             return issueService.findIssuesByStatus(boardId, statusId);
         }

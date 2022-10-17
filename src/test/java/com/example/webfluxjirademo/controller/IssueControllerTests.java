@@ -60,16 +60,16 @@ class IssueControllerTests {
     @Test
     void shouldGetIssuesWhenRequestWithBoardIdAndPoint() {
         Issue issue = new Issue("item", 1, "example.com", "web", new Fields());
-        when(issueService.findIssuesByPoint(1, 1)).thenReturn(Flux.just(issue));
+        when(issueService.findIssuesByPoint(1, 1.0)).thenReturn(Flux.just(issue));
 
         webTestClient.get()
-                .uri("http://localhost:8080/issue?boardId={borderId}&point={point}", 1, 1)
+                .uri("http://localhost:8080/issue?boardId={borderId}&point={point}", 1, 1.0)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(Issue.class)
                 .hasSize(1)
                 .contains(issue);
-        verify(issueService).findIssuesByPoint(1, 1);
+        verify(issueService).findIssuesByPoint(1, 1.0);
     }
 
     @Test
