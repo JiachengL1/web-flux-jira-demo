@@ -27,6 +27,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -188,6 +189,18 @@ class IssueServiceTests {
         basicVerifyWebClient("/issue/" + issue.getId());
         verify(responseSpec).onStatus(any(), any());
         verify(responseSpec).bodyToMono(Issue.class);
+    }
+
+    @Test
+    void shouldHandleInvalidPageSizeAndPageNum() {
+        Issue issue = buildIssueByStatus(10001, 1.0);
+        issue.getFields().setComment(new Comment(List.of(new CommentDetail(), new CommentDetail())));
+
+        basicMockWebClient();
+        doReturn(responseSpec).when(responseSpec).onStatus(any(), any());
+        doReturn(Mono.just(issue)).when(responseSpec).bodyToMono(Issue.class);
+
+        assertDoesNotThrow(() -> issueService.findIssueCommentsById(issue.getId(), -1, -1));
     }
 
     private Issue buildIssueByStatus(int statusId, double point) {
