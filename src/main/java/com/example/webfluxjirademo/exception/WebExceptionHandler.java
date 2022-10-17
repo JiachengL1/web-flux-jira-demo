@@ -14,4 +14,10 @@ public class WebExceptionHandler {
     public Mono<String> handleBoardNotFoundException() {
         return Mono.just("Invalid board id!");
     }
+
+    @ExceptionHandler(IssueNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Mono<String> handleIssueNotFoundException() {
+        return Mono.just("Invalid issue id!");
+    }
 }

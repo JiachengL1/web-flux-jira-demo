@@ -144,6 +144,7 @@ class IssueServiceTests {
         Issue issue = buildIssueByStatus(10001, 1.0);
 
         basicMockWebClient();
+        doReturn(responseSpec).when(responseSpec).onStatus(any(), any());
         doReturn(Mono.just(issue)).when(responseSpec).bodyToMono(Issue.class);
 
         Mono<Issue> result = issueService.findIssueById(issue.getId());
@@ -152,9 +153,11 @@ class IssueServiceTests {
                 .expectNextMatches(issue::equals)
                 .verifyComplete();
         basicVerifyWebClient("/issue/" + issue.getId());
+        verify(responseSpec).onStatus(any(), any());
         verify(responseSpec).bodyToMono(Issue.class);
     }
 
+    @Test
     void shouldFetchErrorByInvalidIssueIdAndThrowException() {
         basicMockWebClient();
         doThrow(IssueNotFoundException.class).when(responseSpec).onStatus(any(), any());
@@ -174,6 +177,7 @@ class IssueServiceTests {
         issue.getFields().setComment(new Comment(List.of(commentDetail)));
 
         basicMockWebClient();
+        doReturn(responseSpec).when(responseSpec).onStatus(any(), any());
         doReturn(Mono.just(issue)).when(responseSpec).bodyToMono(Issue.class);
 
         Flux<CommentDetail> result = issueService.findIssueCommentsById(issue.getId(), 5, 1);
@@ -182,6 +186,7 @@ class IssueServiceTests {
                 .expectNextMatches(commentDetail::equals)
                 .verifyComplete();
         basicVerifyWebClient("/issue/" + issue.getId());
+        verify(responseSpec).onStatus(any(), any());
         verify(responseSpec).bodyToMono(Issue.class);
     }
 
