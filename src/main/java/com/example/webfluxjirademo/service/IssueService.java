@@ -34,7 +34,8 @@ public class IssueService {
     }
 
     public Flux<Issue> findIssuesByPoint(int boardId, double point) {
-        return null;
+        return findAllIssues(boardId)
+                .filter(issue -> issue.getFields().getStoryPoint() == point);
     }
 
     public Mono<Issue> findIssueById(int id) {
