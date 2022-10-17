@@ -19,23 +19,15 @@ public class IssueService {
         this.webClient = webClient;
     }
 
-    public Flux<Issue> findAllIssues(int boardId) {
+    public Flux<Issue> findAllIssues(int boardId, int statusId, double point) {
         return webClient.get()
                 .uri(String.format("/board/%d/issue", boardId))
                 .retrieve()
                 .onStatus(HttpStatus::is4xxClientError, response -> Mono.error(BoardNotFoundException::new))
                 .bodyToMono(Issues.class)
-                .flatMapMany(issues -> Flux.fromIterable(issues.getIssues()));
-    }
-
-    public Flux<Issue> findIssuesByStatus(int boardId, int statusId) {
-        return findAllIssues(boardId)
-                .filter(issue -> issue.getFields().getStatus().getId() == statusId);
-    }
-
-    public Flux<Issue> findIssuesByPoint(int boardId, double point) {
-        return findAllIssues(boardId)
-                .filter(issue -> issue.getFields().getStoryPoint() == point);
+                .flatMapMany(issues -> Flux.fromIterable(issues.getIssues()))
+                .filter(issue -> statusId == -1 || issue.getFields().getStatus().getId() == statusId)
+                .filter(issue -> point == -1 || issue.getFields().getStoryPoint() == point);
     }
 
     public Mono<Issue> findIssueById(int id) {

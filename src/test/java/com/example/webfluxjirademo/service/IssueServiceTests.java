@@ -31,7 +31,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -56,7 +55,7 @@ class IssueServiceTests {
         doReturn(responseSpec).when(responseSpec).onStatus(any(), any());
         doReturn(Mono.just(issues)).when(responseSpec).bodyToMono(Issues.class);
 
-        Flux<Issue> result = issueService.findAllIssues(1);
+        Flux<Issue> result = issueService.findAllIssues(1, -1, -1);
 
         StepVerifier.create(result)
                 .expectNextMatches(new Issue()::equals)
@@ -76,7 +75,7 @@ class IssueServiceTests {
         doReturn(responseSpec).when(responseSpec).onStatus(any(), any());
         doReturn(Mono.just(issues)).when(responseSpec).bodyToMono(Issues.class);
 
-        Flux<Issue> result = issueService.findIssuesByStatus(1, 10002);
+        Flux<Issue> result = issueService.findAllIssues(1, 10002, -1);
 
         StepVerifier.create(result)
                 .expectNextMatches(issue2::equals)
@@ -96,7 +95,28 @@ class IssueServiceTests {
         doReturn(responseSpec).when(responseSpec).onStatus(any(), any());
         doReturn(Mono.just(issues)).when(responseSpec).bodyToMono(Issues.class);
 
-        Flux<Issue> result = issueService.findIssuesByPoint(1, 2.0);
+        Flux<Issue> result = issueService.findAllIssues(1, -1, 2.0);
+
+        StepVerifier.create(result)
+                .expectNextMatches(issue2::equals)
+                .verifyComplete();
+        basicVerifyWebClient("/board/1/issue");
+        verify(responseSpec).onStatus(any(), any());
+        verify(responseSpec).bodyToMono(Issues.class);
+    }
+
+    @Test
+    void shouldFetchIssuesAndReturnFilteredIssueFluxByStatusIdAndPoint() {
+        Issue issue1 = buildIssueByStatus(10001, 1.0);
+        Issue issue2 = buildIssueByStatus(10001, 2.0);
+        Issue issue3 = buildIssueByStatus(10002, 2.0);
+        Issues issues = new Issues("issues", 0, 10, 1, List.of(issue1, issue2, issue3));
+
+        basicMockWebClient();
+        doReturn(responseSpec).when(responseSpec).onStatus(any(), any());
+        doReturn(Mono.just(issues)).when(responseSpec).bodyToMono(Issues.class);
+
+        Flux<Issue> result = issueService.findAllIssues(1, 10001, 2.0);
 
         StepVerifier.create(result)
                 .expectNextMatches(issue2::equals)
@@ -111,12 +131,10 @@ class IssueServiceTests {
         basicMockWebClient();
         doThrow(BoardNotFoundException.class).when(responseSpec).onStatus(any(), any());
 
-        Throwable allThrowable = catchThrowable(() -> issueService.findAllIssues(1));
-        Throwable statusThrowable = catchThrowable(() -> issueService.findIssuesByStatus(1, 10001));
+        Throwable allThrowable = catchThrowable(() -> issueService.findAllIssues(1, -1, -1));
 
         assertThat(allThrowable).isExactlyInstanceOf(BoardNotFoundException.class);
-        assertThat(statusThrowable).isExactlyInstanceOf(BoardNotFoundException.class);
-        verify(responseSpec, times(2)).onStatus(any(), any());
+        verify(responseSpec).onStatus(any(), any());
         verify(responseSpec, never()).bodyToMono(Issues.class);
     }
 
@@ -158,7 +176,6 @@ class IssueServiceTests {
     private Issue buildIssueByStatus(int statusId, double point) {
         Status status = new Status();
         status.setId(statusId);
-
         Fields fields = Fields.builder().status(status).storyPoint(point).build();
         return new Issue("issue", 1, "issue1", "web", fields);
     }

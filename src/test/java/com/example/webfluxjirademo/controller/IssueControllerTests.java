@@ -5,6 +5,7 @@ import com.example.webfluxjirademo.domain.comment.CommentDetail;
 import com.example.webfluxjirademo.domain.issue.Fields;
 import com.example.webfluxjirademo.domain.issue.Issue;
 import com.example.webfluxjirademo.service.IssueService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
@@ -26,11 +27,16 @@ class IssueControllerTests {
     private WebTestClient webTestClient;
     @MockBean
     private IssueService issueService;
+    private Issue issue;
+
+    @BeforeEach
+    void setUp() {
+        issue = new Issue("item", 1, "example.com", "web", new Fields());
+    }
 
     @Test
-    void shouldGetAllIssuesWhenRequestWithBoardId() {
-        Issue issue = new Issue("item", 1, "example.com", "web", new Fields());
-        when(issueService.findAllIssues(1)).thenReturn(Flux.just(issue));
+    void shouldGetAllIssuesWhenRequestWithDefaultStatusIdAndPoint() {
+        when(issueService.findAllIssues(issue.getId(), -1, -1)).thenReturn(Flux.just(issue));
 
         webTestClient.get()
                 .uri("http://localhost:8080/issue?boardId={borderId}", 1)
@@ -39,42 +45,26 @@ class IssueControllerTests {
                 .expectBodyList(Issue.class)
                 .hasSize(1)
                 .contains(issue);
-        verify(issueService).findAllIssues(1);
+        verify(issueService).findAllIssues(issue.getId(), -1, -1);
     }
 
     @Test
-    void shouldGetIssuesWhenRequestWithBoardIdAndStatusId() {
-        Issue issue = new Issue("item", 1, "example.com", "web", new Fields());
-        when(issueService.findIssuesByStatus(1, 10001)).thenReturn(Flux.just(issue));
+    void shouldGetIssuesWhenRequestWithSpecificStatusIdAndPoint() {
+        when(issueService.findAllIssues(issue.getId(), 10001, 1.0)).thenReturn(Flux.just(issue));
 
         webTestClient.get()
-                .uri("http://localhost:8080/issue?boardId={borderId}&statusId={statusId}", 1, 10001)
+                .uri("http://localhost:8080/issue?boardId={borderId}&statusId={statusId}&point={point}",
+                        issue.getId(), 10001, 1.0)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(Issue.class)
                 .hasSize(1)
                 .contains(issue);
-        verify(issueService).findIssuesByStatus(1, 10001);
-    }
-
-    @Test
-    void shouldGetIssuesWhenRequestWithBoardIdAndPoint() {
-        Issue issue = new Issue("item", 1, "example.com", "web", new Fields());
-        when(issueService.findIssuesByPoint(1, 1.0)).thenReturn(Flux.just(issue));
-
-        webTestClient.get()
-                .uri("http://localhost:8080/issue?boardId={borderId}&point={point}", 1, 1.0)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBodyList(Issue.class)
-                .hasSize(1)
-                .contains(issue);
-        verify(issueService).findIssuesByPoint(1, 1.0);
+        verify(issueService).findAllIssues(issue.getId(), 10001, 1.0);
     }
 
     @Test
     void shouldGetSpecificIssueWhenRequestWithId() {
-        Issue issue = new Issue("item", 1, "example.com", "web", new Fields());
         when(issueService.findIssueById(issue.getId())).thenReturn(Mono.just(issue));
 
         webTestClient.get()

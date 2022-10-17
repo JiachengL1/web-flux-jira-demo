@@ -26,13 +26,7 @@ public class IssueController {
             @RequestParam("boardId") int boardId,
             @RequestParam(value = "statusId", defaultValue = "-1") int statusId,
             @RequestParam(value = "point", defaultValue = "-1") double point) {
-        if (statusId != -1) {
-            return issueService.findIssuesByStatus(boardId, statusId);
-        }
-        if (point != -1) {
-            return issueService.findIssuesByPoint(boardId, point);
-        }
-        return issueService.findAllIssues(boardId);
+        return issueService.findAllIssues(boardId, statusId, point);
     }
 
     @GetMapping("/{id}")
