@@ -11,6 +11,11 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import static com.example.webfluxjirademo.config.Constants.DEFAULT_PAGE_NUM;
+import static com.example.webfluxjirademo.config.Constants.DEFAULT_PAGE_SIZE;
+import static com.example.webfluxjirademo.config.Constants.DEFAULT_STATUS_ID;
+import static com.example.webfluxjirademo.config.Constants.DEFAULT_STORY_POINT;
+
 @Service
 public class IssueService {
 
@@ -27,8 +32,8 @@ public class IssueService {
                 .onStatus(HttpStatus::is4xxClientError, response -> Mono.error(BoardNotFoundException::new))
                 .bodyToMono(Issues.class)
                 .flatMapMany(issues -> Flux.fromIterable(issues.getIssues()))
-                .filter(issue -> statusId == -1 || issue.getFields().getStatus().getId() == statusId)
-                .filter(issue -> point == -1 || issue.getFields().getStoryPoint() == point);
+                .filter(issue -> statusId == DEFAULT_STATUS_ID || issue.getFields().getStatus().getId() == statusId)
+                .filter(issue -> point == DEFAULT_STORY_POINT || issue.getFields().getStoryPoint() == point);
     }
 
     public Mono<Issue> findIssueById(int id) {
@@ -40,8 +45,8 @@ public class IssueService {
     }
 
     public Flux<CommentDetail> findIssueCommentsById(int id, int pageSize, int pageNum) {
-        pageSize = pageSize > 0 ? pageSize : 5;
-        pageNum = pageNum > 0 ? pageNum : 1;
+        pageSize = pageSize > 0 ? pageSize : DEFAULT_PAGE_SIZE;
+        pageNum = pageNum > 0 ? pageNum : DEFAULT_PAGE_NUM;
 
         return findIssueById(id)
                 .flatMapMany(issue -> Flux.fromIterable(issue.getFields().getComment().getComments()))

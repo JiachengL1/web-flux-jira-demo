@@ -11,6 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import static com.example.webfluxjirademo.config.Constants.DEFAULT_PAGE_NUM_STR;
+import static com.example.webfluxjirademo.config.Constants.DEFAULT_PAGE_SIZE_STR;
+import static com.example.webfluxjirademo.config.Constants.DEFAULT_STATUS_ID_STR;
+import static com.example.webfluxjirademo.config.Constants.DEFAULT_STORY_POINT_STR;
+
 @RestController
 @RequestMapping("/issue")
 public class IssueController {
@@ -24,8 +29,8 @@ public class IssueController {
     @GetMapping
     public Flux<Issue> getAllIssues(
             @RequestParam("boardId") int boardId,
-            @RequestParam(value = "statusId", defaultValue = "-1") int statusId,
-            @RequestParam(value = "point", defaultValue = "-1") double point) {
+            @RequestParam(value = "statusId", defaultValue = DEFAULT_STATUS_ID_STR) int statusId,
+            @RequestParam(value = "point", defaultValue = DEFAULT_STORY_POINT_STR) double point) {
         return issueService.findAllIssues(boardId, statusId, point);
     }
 
@@ -37,8 +42,8 @@ public class IssueController {
     @GetMapping("/{id}/comments")
     public Flux<CommentDetail> getIssueCommentsById(
             @PathVariable("id") int id,
-            @RequestParam(value = "pageSize", defaultValue = "5") int pageSize,
-            @RequestParam(value = "pageNum", defaultValue = "1") int pageNum) {
+            @RequestParam(value = "pageSize", defaultValue = DEFAULT_PAGE_SIZE_STR) int pageSize,
+            @RequestParam(value = "pageNum", defaultValue = DEFAULT_PAGE_NUM_STR) int pageNum) {
         return issueService.findIssueCommentsById(id, pageSize, pageNum);
     }
 }
