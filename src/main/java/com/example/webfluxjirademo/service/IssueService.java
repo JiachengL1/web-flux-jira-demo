@@ -41,6 +41,9 @@ public class IssueService {
     }
 
     public Flux<CommentDetail> findIssueCommentsById(int id, int pageSize, int pageNum) {
-        return null;
+        return findIssueById(id)
+                .flatMapMany(issue -> Flux.fromIterable(issue.getFields().getComment().getComments()))
+                .skip((long) (pageNum - 1) * pageSize)
+                .take(pageSize);
     }
 }
