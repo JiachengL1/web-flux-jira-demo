@@ -1,5 +1,6 @@
 package com.example.webfluxjirademo.service;
 
+import com.example.webfluxjirademo.domain.comment.CommentDetail;
 import com.example.webfluxjirademo.domain.issue.Issue;
 import com.example.webfluxjirademo.domain.issue.Issues;
 import com.example.webfluxjirademo.exception.BoardNotFoundException;
@@ -37,5 +38,9 @@ public class IssueService {
                 .uri("/issue/" + id)
                 .retrieve()
                 .bodyToMono(Issue.class);
+    }
+
+    public Flux<CommentDetail> findIssueCommentsById(int id, int pageSize, int pageNum) {
+        return null;
     }
 }

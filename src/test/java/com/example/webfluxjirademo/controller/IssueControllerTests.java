@@ -1,5 +1,7 @@
 package com.example.webfluxjirademo.controller;
 
+import com.example.webfluxjirademo.domain.User;
+import com.example.webfluxjirademo.domain.comment.CommentDetail;
 import com.example.webfluxjirademo.domain.issue.Fields;
 import com.example.webfluxjirademo.domain.issue.Issue;
 import com.example.webfluxjirademo.service.IssueService;
@@ -11,6 +13,9 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Instant;
+
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -58,11 +63,27 @@ class IssueControllerTests {
         when(issueService.findIssueById(issue.getId())).thenReturn(Mono.just(issue));
 
         webTestClient.get()
-                .uri("http://localhost:8080/issue/" + issue.getId())
+                .uri("http://localhost:8080/issue/{id}", issue.getId())
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(Issue.class)
                 .isEqualTo(issue);
         verify(issueService).findIssueById(issue.getId());
+    }
+
+    @Test
+    void shouldGetCommentsPageWhenRequestWithId() {
+        CommentDetail commentDetail = new CommentDetail(1, "example.com", "my comment",
+                true, Instant.EPOCH, Instant.EPOCH, new User(), new User());
+        when(issueService.findIssueCommentsById(anyInt(), anyInt(), anyInt())).thenReturn(Flux.just(commentDetail));
+
+        webTestClient.get()
+                .uri("http://localhost:8080/issue/{id}/comments", 1)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(CommentDetail.class)
+                .hasSize(1)
+                .contains(commentDetail);
+        verify(issueService).findIssueCommentsById(1, 5, 1);
     }
 }
