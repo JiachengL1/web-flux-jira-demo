@@ -68,18 +68,38 @@ class IssueServiceTests {
 
     @Test
     void shouldFetchIssuesAndReturnFilteredIssueFluxByStatusId() {
-        Issue issue1 = buildIssueByStatus(10001);
-        Issue issue2 = buildIssueByStatus(10002);
+        Issue issue1 = buildIssueByStatus(10001, 1.0);
+        Issue issue2 = buildIssueByStatus(10002, 1.0);
         Issues issues = new Issues("issues", 0, 10, 1, List.of(issue1, issue2));
 
         basicMockWebClient();
         doReturn(responseSpec).when(responseSpec).onStatus(any(), any());
         doReturn(Mono.just(issues)).when(responseSpec).bodyToMono(Issues.class);
 
-        Flux<Issue> result = issueService.findIssuesByStatus(1, 10001);
+        Flux<Issue> result = issueService.findIssuesByStatus(1, 10002);
 
         StepVerifier.create(result)
-                .expectNextMatches(issue1::equals)
+                .expectNextMatches(issue2::equals)
+                .verifyComplete();
+        basicVerifyWebClient("/board/1/issue");
+        verify(responseSpec).onStatus(any(), any());
+        verify(responseSpec).bodyToMono(Issues.class);
+    }
+
+    @Test
+    void shouldFetchIssuesAndReturnFilteredIssueFluxByPoint() {
+        Issue issue1 = buildIssueByStatus(10001, 1.0);
+        Issue issue2 = buildIssueByStatus(10001, 2.0);
+        Issues issues = new Issues("issues", 0, 10, 1, List.of(issue1, issue2));
+
+        basicMockWebClient();
+        doReturn(responseSpec).when(responseSpec).onStatus(any(), any());
+        doReturn(Mono.just(issues)).when(responseSpec).bodyToMono(Issues.class);
+
+        Flux<Issue> result = issueService.findIssuesByPoint(1, 2.0);
+
+        StepVerifier.create(result)
+                .expectNextMatches(issue2::equals)
                 .verifyComplete();
         basicVerifyWebClient("/board/1/issue");
         verify(responseSpec).onStatus(any(), any());
@@ -102,7 +122,7 @@ class IssueServiceTests {
 
     @Test
     void shouldFetchIssueAndReturnWhole() {
-        Issue issue = buildIssueByStatus(10001);
+        Issue issue = buildIssueByStatus(10001, 1.0);
 
         basicMockWebClient();
         doReturn(Mono.just(issue)).when(responseSpec).bodyToMono(Issue.class);
@@ -118,7 +138,7 @@ class IssueServiceTests {
 
     @Test
     void shouldFetchIssueAndReturnCommentsPage() {
-        Issue issue = buildIssueByStatus(10001);
+        Issue issue = buildIssueByStatus(10001, 1.0);
         CommentDetail commentDetail = new CommentDetail(1, "example.com", "my comment",
                 true, Instant.EPOCH, Instant.EPOCH, new User(), new User());
         issue.getFields().setComment(new Comment(List.of(commentDetail)));
@@ -135,11 +155,11 @@ class IssueServiceTests {
         verify(responseSpec).bodyToMono(Issue.class);
     }
 
-    private Issue buildIssueByStatus(int statusId) {
+    private Issue buildIssueByStatus(int statusId, double point) {
         Status status = new Status();
         status.setId(statusId);
 
-        Fields fields = Fields.builder().status(status).build();
+        Fields fields = Fields.builder().status(status).storyPoint(point).build();
         return new Issue("issue", 1, "issue1", "web", fields);
     }
 
