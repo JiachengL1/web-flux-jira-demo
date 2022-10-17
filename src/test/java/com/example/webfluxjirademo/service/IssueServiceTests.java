@@ -8,6 +8,7 @@ import com.example.webfluxjirademo.domain.issue.Issue;
 import com.example.webfluxjirademo.domain.issue.Issues;
 import com.example.webfluxjirademo.domain.status.Status;
 import com.example.webfluxjirademo.exception.BoardNotFoundException;
+import com.example.webfluxjirademo.exception.IssueNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -131,9 +132,9 @@ class IssueServiceTests {
         basicMockWebClient();
         doThrow(BoardNotFoundException.class).when(responseSpec).onStatus(any(), any());
 
-        Throwable allThrowable = catchThrowable(() -> issueService.findAllIssues(1, -1, -1));
+        Throwable throwable = catchThrowable(() -> issueService.findAllIssues(1, -1, -1));
 
-        assertThat(allThrowable).isExactlyInstanceOf(BoardNotFoundException.class);
+        assertThat(throwable).isExactlyInstanceOf(BoardNotFoundException.class);
         verify(responseSpec).onStatus(any(), any());
         verify(responseSpec, never()).bodyToMono(Issues.class);
     }
@@ -152,6 +153,17 @@ class IssueServiceTests {
                 .verifyComplete();
         basicVerifyWebClient("/issue/" + issue.getId());
         verify(responseSpec).bodyToMono(Issue.class);
+    }
+
+    void shouldFetchErrorByInvalidIssueIdAndThrowException() {
+        basicMockWebClient();
+        doThrow(IssueNotFoundException.class).when(responseSpec).onStatus(any(), any());
+
+        Throwable throwable = catchThrowable(() -> issueService.findIssueById(1));
+
+        assertThat(throwable).isExactlyInstanceOf(IssueNotFoundException.class);
+        verify(responseSpec).onStatus(any(), any());
+        verify(responseSpec, never()).bodyToMono(Issues.class);
     }
 
     @Test
