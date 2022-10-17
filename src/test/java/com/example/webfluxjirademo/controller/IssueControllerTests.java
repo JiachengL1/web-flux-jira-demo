@@ -33,7 +33,7 @@ class IssueControllerTests {
         when(issueService.findAllIssues(1)).thenReturn(Flux.just(issue));
 
         webTestClient.get()
-                .uri("http://localhost:8080/issue?boardId=1")
+                .uri("http://localhost:8080/issue?boardId={borderId}", 1)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(Issue.class)
@@ -48,7 +48,7 @@ class IssueControllerTests {
         when(issueService.findIssuesByStatus(1, 10001)).thenReturn(Flux.just(issue));
 
         webTestClient.get()
-                .uri("http://localhost:8080/issue?boardId=1&statusId=10001")
+                .uri("http://localhost:8080/issue?boardId={borderId}&statusId={statusId}", 1, 10001)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(Issue.class)
