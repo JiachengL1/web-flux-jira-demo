@@ -203,6 +203,28 @@ class IssueServiceTests {
         assertDoesNotThrow(() -> issueService.findIssueCommentsById(issue.getId(), -1, -1));
     }
 
+    @Test
+    void shouldFetchIssuesAndFilterWithLabel() {
+        Issue issue1 = buildIssueByStatus(1001, 1.0);
+        issue1.getFields().setLabels(List.of("empty"));
+        Issue issue2 = buildIssueByStatus(1001, 1.0);
+        issue2.getFields().setLabels(List.of("test"));
+        Issues issues = new Issues("issues", 0, 10, 1, List.of(issue1, issue2));
+
+        basicMockWebClient();
+        doReturn(responseSpec).when(responseSpec).onStatus(any(), any());
+        doReturn(Mono.just(issues)).when(responseSpec).bodyToMono(Issues.class);
+
+        Flux<Issue> result = issueService.findIssuesByLabel(1, "test");
+
+        StepVerifier.create(result)
+                .expectNextMatches(issue2::equals)
+                .verifyComplete();
+        basicVerifyWebClient("/board/1/issue");
+        verify(responseSpec).onStatus(any(), any());
+        verify(responseSpec).bodyToMono(Issues.class);
+    }
+
     private Issue buildIssueByStatus(int statusId, double point) {
         Status status = new Status();
         status.setId(statusId);
