@@ -23,6 +23,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.time.Instant;
+import java.time.Period;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,6 +31,7 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -225,6 +227,33 @@ class IssueServiceTests {
         verify(responseSpec).bodyToMono(Issues.class);
     }
 
+    @Test
+    void shouldFetchIssuesAndFilterWithDays() {
+        Issue issue1 = buildIssueByStatus(10001, 1.0);
+        issue1.getFields().setUpdated(Instant.now().minus(Period.ofDays(1)));
+        Issue issue2 = buildIssueByStatus(10001, 1.0);
+        issue2.getFields().setUpdated(Instant.now());
+        Issues issues = new Issues("issues", 0, 10, 1, List.of(issue1, issue2));
+
+        basicMockWebClient();
+        doReturn(responseSpec).when(responseSpec).onStatus(any(), any());
+        doReturn(Mono.just(issues)).when(responseSpec).bodyToMono(Issues.class);
+
+        Flux<Issue> result1 = issueService.findRecentIssues(1, 1);
+        Flux<Issue> result2 = issueService.findRecentIssues(1, 2);
+
+        StepVerifier.create(result1)
+                .expectNextMatches(issue2::equals)
+                .verifyComplete();
+        StepVerifier.create(result2)
+                .expectNextMatches(issue2::equals)
+                .expectNextMatches(issue1::equals)
+                .verifyComplete();
+        basicVerifyWebClient("/board/1/issue");
+        verify(responseSpec, atLeastOnce()).onStatus(any(), any());
+        verify(responseSpec, atLeastOnce()).bodyToMono(Issues.class);
+    }
+
     private Issue buildIssueByStatus(int statusId, double point) {
         Status status = new Status();
         status.setId(statusId);
@@ -239,8 +268,8 @@ class IssueServiceTests {
     }
 
     private void basicVerifyWebClient(String uri) {
-        verify(webClient).get();
-        verify(requestHeadersUriSpec).uri(uri);
-        verify(requestHeadersSpec).retrieve();
+        verify(webClient, atLeastOnce()).get();
+        verify(requestHeadersUriSpec, atLeastOnce()).uri(uri);
+        verify(requestHeadersSpec, atLeastOnce()).retrieve();
     }
 }
