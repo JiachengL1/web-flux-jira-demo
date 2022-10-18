@@ -106,4 +106,18 @@ class IssueControllerTests {
                 .contains(issue);
         verify(issueService).findIssuesByLabel(1, "test");
     }
+
+    @Test
+    void shouldGetRecentIssuesWhenRequestWithBoardIdAndDays() {
+        when(issueService.findRecentIssues(1, 10)).thenReturn(Flux.just(issue));
+
+        webTestClient.get()
+                .uri("http://localhost:8080/issues/recent?boardId={boardId}&days={days}", 1, 10)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(Issue.class)
+                .hasSize(1)
+                .contains(issue);
+        verify(issueService).findRecentIssues(1, 10);
+    }
 }
