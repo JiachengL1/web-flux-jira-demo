@@ -1,12 +1,14 @@
 package com.example.webfluxjirademo.domain.issue;
 
-import com.example.webfluxjirademo.config.InstantFormatConfig;
+import com.example.webfluxjirademo.config.CustomInstantDeserializer;
+import com.example.webfluxjirademo.config.CustomInstantSerializer;
 import com.example.webfluxjirademo.domain.Project;
 import com.example.webfluxjirademo.domain.User;
 import com.example.webfluxjirademo.domain.comment.Comment;
 import com.example.webfluxjirademo.domain.status.Status;
 import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,11 +28,14 @@ public class Fields {
     private boolean flagged;
     @JsonAlias("customfield_10016")
     private double storyPoint;
-    @JsonFormat(pattern = InstantFormatConfig.PATTERN, timezone = InstantFormatConfig.TIMEZONE)
+    @JsonSerialize(using = CustomInstantSerializer.class)
+    @JsonDeserialize(using = CustomInstantDeserializer.class)
     private Instant lastViewed;
-    @JsonFormat(pattern = InstantFormatConfig.PATTERN, timezone = InstantFormatConfig.TIMEZONE)
+    @JsonSerialize(using = CustomInstantSerializer.class)
+    @JsonDeserialize(using = CustomInstantDeserializer.class)
     private Instant created;
-    @JsonFormat(pattern = InstantFormatConfig.PATTERN, timezone = InstantFormatConfig.TIMEZONE)
+    @JsonSerialize(using = CustomInstantSerializer.class)
+    @JsonDeserialize(using = CustomInstantDeserializer.class)
     private Instant updated;
     private User creator;
     private User reporter;
