@@ -11,10 +11,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import static com.example.webfluxjirademo.config.Constants.DEFAULT_PAGE_NUM;
-import static com.example.webfluxjirademo.config.Constants.DEFAULT_PAGE_SIZE;
-import static com.example.webfluxjirademo.config.Constants.DEFAULT_STATUS_ID;
-import static com.example.webfluxjirademo.config.Constants.DEFAULT_STORY_POINT;
+import static com.example.webfluxjirademo.util.Constants.DEFAULT_PAGE_NUM;
+import static com.example.webfluxjirademo.util.Constants.DEFAULT_PAGE_SIZE;
+import static com.example.webfluxjirademo.util.Constants.DEFAULT_STATUS_ID;
+import static com.example.webfluxjirademo.util.Constants.DEFAULT_STORY_POINT;
 
 @Service
 public class IssueService {

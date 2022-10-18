@@ -1,7 +1,7 @@
 package com.example.webfluxjirademo.domain.issue;
 
-import com.example.webfluxjirademo.config.CustomInstantDeserializer;
-import com.example.webfluxjirademo.config.CustomInstantSerializer;
+import com.example.webfluxjirademo.util.CustomInstantDeserializer;
+import com.example.webfluxjirademo.util.CustomInstantSerializer;
 import com.example.webfluxjirademo.domain.Project;
 import com.example.webfluxjirademo.domain.User;
 import com.example.webfluxjirademo.domain.comment.Comment;

@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import static com.example.webfluxjirademo.config.Constants.DEFAULT_PAGE_NUM_STR;
-import static com.example.webfluxjirademo.config.Constants.DEFAULT_PAGE_SIZE_STR;
-import static com.example.webfluxjirademo.config.Constants.DEFAULT_STATUS_ID_STR;
-import static com.example.webfluxjirademo.config.Constants.DEFAULT_STORY_POINT_STR;
+import static com.example.webfluxjirademo.util.Constants.DEFAULT_PAGE_NUM_STR;
+import static com.example.webfluxjirademo.util.Constants.DEFAULT_PAGE_SIZE_STR;
+import static com.example.webfluxjirademo.util.Constants.DEFAULT_STATUS_ID_STR;
+import static com.example.webfluxjirademo.util.Constants.DEFAULT_STORY_POINT_STR;
 
 @RestController
 @RequestMapping("/issue")

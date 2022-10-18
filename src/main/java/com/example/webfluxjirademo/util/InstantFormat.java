@@ -1,8 +1,8 @@
-package com.example.webfluxjirademo.config;
+package com.example.webfluxjirademo.util;
 
-public class InstantFormatConfig {
+public class InstantFormat {
 
-    private InstantFormatConfig() {}
+    private InstantFormat() {}
 
     public static final String PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 

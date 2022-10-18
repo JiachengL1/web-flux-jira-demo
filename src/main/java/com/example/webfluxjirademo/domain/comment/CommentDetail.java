@@ -1,7 +1,7 @@
 package com.example.webfluxjirademo.domain.comment;
 
-import com.example.webfluxjirademo.config.CustomInstantDeserializer;
-import com.example.webfluxjirademo.config.CustomInstantSerializer;
+import com.example.webfluxjirademo.util.CustomInstantDeserializer;
+import com.example.webfluxjirademo.util.CustomInstantSerializer;
 import com.example.webfluxjirademo.domain.User;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;

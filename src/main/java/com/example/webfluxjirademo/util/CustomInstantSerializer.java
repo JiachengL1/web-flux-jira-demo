@@ -1,4 +1,4 @@
-package com.example.webfluxjirademo.config;
+package com.example.webfluxjirademo.util;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -9,7 +9,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
-import static com.example.webfluxjirademo.config.InstantFormatConfig.SIMPLE_PATTERN;
+import static com.example.webfluxjirademo.util.InstantFormat.SIMPLE_PATTERN;
 
 public class CustomInstantSerializer extends StdSerializer<Instant> {
 

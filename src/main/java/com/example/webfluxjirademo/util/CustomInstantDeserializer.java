@@ -1,4 +1,4 @@
-package com.example.webfluxjirademo.config;
+package com.example.webfluxjirademo.util;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -9,8 +9,8 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
-import static com.example.webfluxjirademo.config.InstantFormatConfig.PATTERN;
-import static com.example.webfluxjirademo.config.InstantFormatConfig.TIMEZONE;
+import static com.example.webfluxjirademo.util.InstantFormat.PATTERN;
+import static com.example.webfluxjirademo.util.InstantFormat.TIMEZONE;
 
 public class CustomInstantDeserializer extends StdDeserializer<Instant> {
 

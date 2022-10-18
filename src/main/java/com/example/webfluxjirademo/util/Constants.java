@@ -1,4 +1,4 @@
-package com.example.webfluxjirademo.config;
+package com.example.webfluxjirademo.util;
 
 public class Constants {
 
