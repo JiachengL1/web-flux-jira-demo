@@ -46,4 +46,10 @@ public class IssueController {
             @RequestParam(value = "pageNum", defaultValue = DEFAULT_PAGE_NUM_STR) int pageNum) {
         return issueService.findIssueCommentsById(id, pageSize, pageNum);
     }
+
+    @GetMapping("/label")
+    public Flux<Issue> getIssuesByLabel(@RequestParam("boardId") int boardId,
+                                        @RequestParam(value = "label", defaultValue = "") String label) {
+        return issueService.findIssuesByLabel(boardId, label);
+    }
 }
