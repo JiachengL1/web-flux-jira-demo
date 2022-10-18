@@ -39,7 +39,7 @@ class IssueControllerTests {
         when(issueService.findAllIssues(issue.getId(), -1, -1)).thenReturn(Flux.just(issue));
 
         webTestClient.get()
-                .uri("http://localhost:8080/issue?boardId={borderId}", 1)
+                .uri("http://localhost:8080/issues?boardId={borderId}", 1)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(Issue.class)
@@ -53,7 +53,7 @@ class IssueControllerTests {
         when(issueService.findAllIssues(issue.getId(), 10001, 1.0)).thenReturn(Flux.just(issue));
 
         webTestClient.get()
-                .uri("http://localhost:8080/issue?boardId={borderId}&statusId={statusId}&point={point}",
+                .uri("http://localhost:8080/issues?boardId={borderId}&statusId={statusId}&point={point}",
                         issue.getId(), 10001, 1.0)
                 .exchange()
                 .expectStatus().isOk()
@@ -68,7 +68,7 @@ class IssueControllerTests {
         when(issueService.findIssueById(issue.getId())).thenReturn(Mono.just(issue));
 
         webTestClient.get()
-                .uri("http://localhost:8080/issue/{id}", issue.getId())
+                .uri("http://localhost:8080/issues/{id}", issue.getId())
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(Issue.class)
@@ -83,7 +83,7 @@ class IssueControllerTests {
         when(issueService.findIssueCommentsById(anyInt(), anyInt(), anyInt())).thenReturn(Flux.just(commentDetail));
 
         webTestClient.get()
-                .uri("http://localhost:8080/issue/{id}/comments", 1)
+                .uri("http://localhost:8080/issues/{id}/comments", 1)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(CommentDetail.class)
@@ -98,7 +98,7 @@ class IssueControllerTests {
         when(issueService.findIssuesByLabel(1, "test")).thenReturn(Flux.just(issue));
 
         webTestClient.get()
-                .uri("http://localhost:8080/issue/label?boardId={boardId}&label={label}", 1, "test")
+                .uri("http://localhost:8080/issues/label?boardId={boardId}&label={label}", 1, "test")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(Issue.class)

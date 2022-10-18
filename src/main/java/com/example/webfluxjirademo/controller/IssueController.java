@@ -17,7 +17,7 @@ import static com.example.webfluxjirademo.util.Constants.DEFAULT_STATUS_ID_STR;
 import static com.example.webfluxjirademo.util.Constants.DEFAULT_STORY_POINT_STR;
 
 @RestController
-@RequestMapping("/issue")
+@RequestMapping("/issues")
 public class IssueController {
 
     private final IssueService issueService;

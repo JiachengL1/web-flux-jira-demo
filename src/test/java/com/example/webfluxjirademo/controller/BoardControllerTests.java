@@ -24,11 +24,11 @@ class BoardControllerTests {
 
     @Test
     void shouldGetAllBoardsWhenRequestWithNoArgs() {
-        Board board = new Board(1, "/board/1", "board1", "simple", new Location());
+        Board board = new Board(1, "/boards/1", "board1", "simple", new Location());
         when(boardService.findAllBoards()).thenReturn(Flux.just(board));
 
         webTestClient.get()
-                .uri("http://localhost:8080/board")
+                .uri("http://localhost:8080/boards")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(Board.class)
@@ -39,11 +39,11 @@ class BoardControllerTests {
 
     @Test
     void shouldGetSpecificBoardWhenRequestWithBoardId() {
-        Board board = new Board(1, "/board/1", "board1", "simple", new Location());
+        Board board = new Board(1, "/boards/1", "board1", "simple", new Location());
         when(boardService.findBoardById(board.getId())).thenReturn(Mono.just(board));
 
         webTestClient.get()
-                .uri("http://localhost:8080/board/{id}", board.getId())
+                .uri("http://localhost:8080/boards/{id}", board.getId())
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(Board.class)
