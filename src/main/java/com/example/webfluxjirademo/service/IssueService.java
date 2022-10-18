@@ -55,6 +55,7 @@ public class IssueService {
     }
 
     public Flux<Issue> findIssuesByLabel(int boardId, String label) {
-        return null;
+        return findAllIssues(boardId, DEFAULT_STATUS_ID, DEFAULT_STORY_POINT)
+                .filter(issue -> issue.getFields().getLabels().contains(label));
     }
 }
