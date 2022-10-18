@@ -11,6 +11,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Instant;
+import java.time.Period;
+
 import static com.example.webfluxjirademo.util.Constants.DEFAULT_PAGE_NUM;
 import static com.example.webfluxjirademo.util.Constants.DEFAULT_PAGE_SIZE;
 import static com.example.webfluxjirademo.util.Constants.DEFAULT_STATUS_ID;
@@ -60,6 +63,9 @@ public class IssueService {
     }
 
     public Flux<Issue> findRecentIssues(int boardId, int days) {
-        return null;
+        Instant baseline = Instant.now().minus(Period.ofDays(days));
+        return findAllIssues(boardId, -1, -1)
+                .filter(issue -> issue.getFields().getUpdated().isAfter(baseline))
+                .sort((o1, o2) -> o2.getFields().getUpdated().compareTo(o1.getFields().getUpdated()));
     }
 }
