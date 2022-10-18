@@ -53,4 +53,8 @@ public class IssueService {
                 .skip((long) (pageNum - 1) * pageSize)
                 .take(pageSize);
     }
+
+    public Flux<Issue> findIssuesByLabel(int boardId, String label) {
+        return null;
+    }
 }

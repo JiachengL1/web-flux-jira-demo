@@ -14,6 +14,8 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -88,5 +90,20 @@ class IssueControllerTests {
                 .hasSize(1)
                 .contains(commentDetail);
         verify(issueService).findIssueCommentsById(1, 5, 1);
+    }
+
+    @Test
+    void shouldGetIssuesWhenRequestWithBoardIdAndLabel() {
+        issue.getFields().setLabels(List.of("test"));
+        when(issueService.findIssuesByLabel(1, "test")).thenReturn(Flux.just(issue));
+
+        webTestClient.get()
+                .uri("http://localhost:8080/issue/label?boardId={boardId}&label={label}", 1, "test")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(Issue.class)
+                .hasSize(1)
+                .contains(issue);
+        verify(issueService).findIssuesByLabel(1, "test");
     }
 }
