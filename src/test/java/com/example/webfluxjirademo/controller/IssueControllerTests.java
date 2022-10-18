@@ -14,8 +14,6 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.Instant;
-
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -79,7 +77,7 @@ class IssueControllerTests {
     @Test
     void shouldGetCommentsPageWhenRequestWithId() {
         CommentDetail commentDetail = new CommentDetail(1, "example.com", "my comment",
-                true, Instant.EPOCH, Instant.EPOCH, new User(), new User());
+                true, null, null, new User(), new User());
         when(issueService.findIssueCommentsById(anyInt(), anyInt(), anyInt())).thenReturn(Flux.just(commentDetail));
 
         webTestClient.get()
