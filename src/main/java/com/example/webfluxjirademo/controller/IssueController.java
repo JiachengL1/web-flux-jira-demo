@@ -52,4 +52,10 @@ public class IssueController {
                                         @RequestParam(value = "label", defaultValue = "") String label) {
         return issueService.findIssuesByLabel(boardId, label);
     }
+
+    @GetMapping("/recent")
+    public Flux<Issue> getRecentIssues(@RequestParam("boardId") int boardId,
+                                       @RequestParam(value = "days",defaultValue = "1") int days) {
+        return issueService.findRecentIssues(boardId, days);
+    }
 }
