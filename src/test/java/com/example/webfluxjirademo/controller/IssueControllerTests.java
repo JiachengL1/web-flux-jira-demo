@@ -5,11 +5,12 @@ import com.example.webfluxjirademo.domain.comment.CommentDetail;
 import com.example.webfluxjirademo.domain.issue.Fields;
 import com.example.webfluxjirademo.domain.issue.Issue;
 import com.example.webfluxjirademo.service.IssueService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -27,11 +28,15 @@ class IssueControllerTests {
     private WebTestClient webTestClient;
     @MockBean
     private IssueService issueService;
+    @Autowired
     private Issue issue;
 
-    @BeforeEach
-    void setUp() {
-        issue = new Issue("item", 1, "example.com", "web", new Fields());
+    @TestConfiguration
+    static class IssueControllerContextConfiguration {
+        @Bean
+        public Issue getIssue() {
+            return new Issue("item", 1, "example.com", "web", new Fields());
+        }
     }
 
     @Test
