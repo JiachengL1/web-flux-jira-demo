@@ -59,7 +59,7 @@ public class IssueService {
 
     public Flux<Issue> findIssuesByLabel(int boardId, String label) {
         return findAllIssues(boardId, DEFAULT_STATUS_ID, DEFAULT_STORY_POINT)
-                .filter(issue -> issue.getFields().getLabels().contains(label));
+                .filter(issue -> label.isBlank() || issue.getFields().getLabels().contains(label));
     }
 
     public Flux<Issue> findRecentIssues(int boardId, int days) {

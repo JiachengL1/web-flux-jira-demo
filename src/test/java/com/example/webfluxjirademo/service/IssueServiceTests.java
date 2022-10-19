@@ -179,9 +179,14 @@ class IssueServiceTests {
         Issues issues = buildIssuesByList(issue1, issue2);
         mockWebClientAndReturnIssues(issues);
 
-        Flux<Issue> result = issueService.findIssuesByLabel(1, "test");
+        Flux<Issue> result1 = issueService.findIssuesByLabel(1, "test");
+        Flux<Issue> result2 = issueService.findIssuesByLabel(1, " ");
 
-        StepVerifier.create(result)
+        StepVerifier.create(result1)
+                .expectNextMatches(issue2::equals)
+                .verifyComplete();
+        StepVerifier.create(result2)
+                .expectNextMatches(issue1::equals)
                 .expectNextMatches(issue2::equals)
                 .verifyComplete();
         verifyWebClientWithUriAndClass("/board/1/issue", Issues.class);
@@ -229,7 +234,7 @@ class IssueServiceTests {
         verify(responseSpec, atLeastOnce()).bodyToMono(type);
     }
 
-    private Issues buildIssuesByList(Issue ...issues) {
+    private Issues buildIssuesByList(Issue... issues) {
         return new Issues("issues", 0, issues.length, issues.length, List.of(issues));
     }
 
