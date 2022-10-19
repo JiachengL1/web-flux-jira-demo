@@ -20,8 +20,8 @@ public class CustomInstantSerializer extends StdSerializer<Instant> {
         this(null);
     }
 
-    public CustomInstantSerializer(Class<Instant> t) {
-        super(t);
+    public CustomInstantSerializer(Class<Instant> instant) {
+        super(instant);
     }
 
     @Override

@@ -21,8 +21,8 @@ public class CustomInstantDeserializer extends StdDeserializer<Instant> {
         this(null);
     }
 
-    public CustomInstantDeserializer(Class<Instant> vc) {
-        super(vc);
+    public CustomInstantDeserializer(Class<Instant> instant) {
+        super(instant);
     }
 
     @Override
