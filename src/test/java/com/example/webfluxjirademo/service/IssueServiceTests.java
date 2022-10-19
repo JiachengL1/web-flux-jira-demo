@@ -66,46 +66,46 @@ class IssueServiceTests {
 
     @Test
     void shouldFetchIssuesAndReturnFilteredIssueFluxByStatusId() {
-        Issue issue1 = buildCommonIssue(10001, 1.0, "");
-        Issue issue2 = buildCommonIssue(10002, 1.0, "");
-        Issues issues = buildIssuesByList(issue1, issue2);
+        Issue issueInProgress = buildCommonIssue(10001, 1.0, "");
+        Issue issueDone = buildCommonIssue(10002, 1.0, "");
+        Issues issues = buildIssuesByList(issueInProgress, issueDone);
         mockWebClientAndReturnIssues(issues);
 
         Flux<Issue> result = issueService.findAllIssues(1, 10002, -1);
 
         StepVerifier.create(result)
-                .expectNextMatches(issue2::equals)
+                .expectNextMatches(issueDone::equals)
                 .verifyComplete();
         verifyWebClientWithUriAndClass("/board/1/issue", Issues.class);
     }
 
     @Test
     void shouldFetchIssuesAndReturnFilteredIssueFluxByPoint() {
-        Issue issue1 = buildCommonIssue(10001, 1.0, "");
-        Issue issue2 = buildCommonIssue(10001, 2.0, "");
-        Issues issues = buildIssuesByList(issue1, issue2);
+        Issue onePointIssue = buildCommonIssue(10001, 1.0, "");
+        Issue twoPointsIssue = buildCommonIssue(10001, 2.0, "");
+        Issues issues = buildIssuesByList(onePointIssue, twoPointsIssue);
         mockWebClientAndReturnIssues(issues);
 
         Flux<Issue> result = issueService.findAllIssues(1, -1, 2.0);
 
         StepVerifier.create(result)
-                .expectNextMatches(issue2::equals)
+                .expectNextMatches(twoPointsIssue::equals)
                 .verifyComplete();
         verifyWebClientWithUriAndClass("/board/1/issue", Issues.class);
     }
 
     @Test
     void shouldFetchIssuesAndReturnFilteredIssueFluxByStatusIdAndPoint() {
-        Issue issue1 = buildCommonIssue(10001, 1.0, "");
-        Issue issue2 = buildCommonIssue(10001, 2.0, "");
-        Issue issue3 = buildCommonIssue(10002, 2.0, "");
-        Issues issues = buildIssuesByList(issue1, issue2, issue3);
+        Issue issueCondition1 = buildCommonIssue(10001, 1.0, "");
+        Issue issueCondition1And2 = buildCommonIssue(10001, 2.0, "");
+        Issue issueCondition2 = buildCommonIssue(10002, 2.0, "");
+        Issues issues = buildIssuesByList(issueCondition1, issueCondition1And2, issueCondition2);
         mockWebClientAndReturnIssues(issues);
 
         Flux<Issue> result = issueService.findAllIssues(1, 10001, 2.0);
 
         StepVerifier.create(result)
-                .expectNextMatches(issue2::equals)
+                .expectNextMatches(issueCondition1And2::equals)
                 .verifyComplete();
         verifyWebClientWithUriAndClass("/board/1/issue", Issues.class);
     }
@@ -174,42 +174,42 @@ class IssueServiceTests {
 
     @Test
     void shouldFetchIssuesAndFilterWithLabel() {
-        Issue issue1 = buildCommonIssue(1001, 1.0, "empty");
-        Issue issue2 = buildCommonIssue(1001, 1.0, "test");
-        Issues issues = buildIssuesByList(issue1, issue2);
+        Issue emptyIssue = buildCommonIssue(1001, 1.0, "empty");
+        Issue testIssue = buildCommonIssue(1001, 1.0, "test");
+        Issues issues = buildIssuesByList(emptyIssue, testIssue);
         mockWebClientAndReturnIssues(issues);
 
-        Flux<Issue> result1 = issueService.findIssuesByLabel(1, "test");
-        Flux<Issue> result2 = issueService.findIssuesByLabel(1, " ");
+        Flux<Issue> testResult = issueService.findIssuesByLabel(1, "test");
+        Flux<Issue> allResult = issueService.findIssuesByLabel(1, " ");
 
-        StepVerifier.create(result1)
-                .expectNextMatches(issue2::equals)
+        StepVerifier.create(testResult)
+                .expectNextMatches(testIssue::equals)
                 .verifyComplete();
-        StepVerifier.create(result2)
-                .expectNextMatches(issue1::equals)
-                .expectNextMatches(issue2::equals)
+        StepVerifier.create(allResult)
+                .expectNextMatches(emptyIssue::equals)
+                .expectNextMatches(testIssue::equals)
                 .verifyComplete();
         verifyWebClientWithUriAndClass("/board/1/issue", Issues.class);
     }
 
     @Test
     void shouldFetchIssuesAndFilterWithDays() {
-        Issue issue1 = buildCommonIssue(10001, 1.0, "");
-        issue1.getFields().setUpdated(Instant.now().minus(Period.ofDays(1)));
-        Issue issue2 = buildCommonIssue(10001, 1.0, "");
-        issue2.getFields().setUpdated(Instant.now());
-        Issues issues = buildIssuesByList(issue1, issue2);
+        Issue issueLastDay = buildCommonIssue(10001, 1.0, "");
+        issueLastDay.getFields().setUpdated(Instant.now().minus(Period.ofDays(1)));
+        Issue issueNow = buildCommonIssue(10001, 1.0, "");
+        issueNow.getFields().setUpdated(Instant.now());
+        Issues issues = buildIssuesByList(issueLastDay, issueNow);
         mockWebClientAndReturnIssues(issues);
 
-        Flux<Issue> result1 = issueService.findRecentIssues(1, 1);
-        Flux<Issue> result2 = issueService.findRecentIssues(1, 2);
+        Flux<Issue> resultIn1Day = issueService.findRecentIssues(1, 1);
+        Flux<Issue> resultIn2Days = issueService.findRecentIssues(1, 2);
 
-        StepVerifier.create(result1)
-                .expectNextMatches(issue2::equals)
+        StepVerifier.create(resultIn1Day)
+                .expectNextMatches(issueNow::equals)
                 .verifyComplete();
-        StepVerifier.create(result2)
-                .expectNextMatches(issue2::equals)
-                .expectNextMatches(issue1::equals)
+        StepVerifier.create(resultIn2Days)
+                .expectNextMatches(issueNow::equals)
+                .expectNextMatches(issueLastDay::equals)
                 .verifyComplete();
         verifyWebClientWithUriAndClass("/board/1/issue", Issues.class);
     }
