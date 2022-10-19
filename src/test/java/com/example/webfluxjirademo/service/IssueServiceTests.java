@@ -53,86 +53,66 @@ class IssueServiceTests {
 
     @Test
     void shouldFetchIssuesByBoardIdAndReturnIssueFlux() {
-        Issues issues = new Issues("issues", 0, 10, 1, List.of(new Issue()));
-
-        basicMockWebClient();
-        doReturn(responseSpec).when(responseSpec).onStatus(any(), any());
-        doReturn(Mono.just(issues)).when(responseSpec).bodyToMono(Issues.class);
+        Issues issues = buildIssuesByList(new Issue());
+        mockWebClientAndReturnIssues(issues);
 
         Flux<Issue> result = issueService.findAllIssues(1, -1, -1);
 
         StepVerifier.create(result)
                 .expectNextMatches(new Issue()::equals)
                 .verifyComplete();
-        basicVerifyWebClient("/board/1/issue");
-        verify(responseSpec).onStatus(any(), any());
-        verify(responseSpec).bodyToMono(Issues.class);
+        verifyWebClientWithUriAndClass("/board/1/issue", Issues.class);
     }
 
     @Test
     void shouldFetchIssuesAndReturnFilteredIssueFluxByStatusId() {
-        Issue issue1 = buildIssueByStatus(10001, 1.0);
-        Issue issue2 = buildIssueByStatus(10002, 1.0);
-        Issues issues = new Issues("issues", 0, 10, 1, List.of(issue1, issue2));
-
-        basicMockWebClient();
-        doReturn(responseSpec).when(responseSpec).onStatus(any(), any());
-        doReturn(Mono.just(issues)).when(responseSpec).bodyToMono(Issues.class);
+        Issue issue1 = buildCommonIssue(10001, 1.0, "");
+        Issue issue2 = buildCommonIssue(10002, 1.0, "");
+        Issues issues = buildIssuesByList(issue1, issue2);
+        mockWebClientAndReturnIssues(issues);
 
         Flux<Issue> result = issueService.findAllIssues(1, 10002, -1);
 
         StepVerifier.create(result)
                 .expectNextMatches(issue2::equals)
                 .verifyComplete();
-        basicVerifyWebClient("/board/1/issue");
-        verify(responseSpec).onStatus(any(), any());
-        verify(responseSpec).bodyToMono(Issues.class);
+        verifyWebClientWithUriAndClass("/board/1/issue", Issues.class);
     }
 
     @Test
     void shouldFetchIssuesAndReturnFilteredIssueFluxByPoint() {
-        Issue issue1 = buildIssueByStatus(10001, 1.0);
-        Issue issue2 = buildIssueByStatus(10001, 2.0);
-        Issues issues = new Issues("issues", 0, 10, 1, List.of(issue1, issue2));
-
-        basicMockWebClient();
-        doReturn(responseSpec).when(responseSpec).onStatus(any(), any());
-        doReturn(Mono.just(issues)).when(responseSpec).bodyToMono(Issues.class);
+        Issue issue1 = buildCommonIssue(10001, 1.0, "");
+        Issue issue2 = buildCommonIssue(10001, 2.0, "");
+        Issues issues = buildIssuesByList(issue1, issue2);
+        mockWebClientAndReturnIssues(issues);
 
         Flux<Issue> result = issueService.findAllIssues(1, -1, 2.0);
 
         StepVerifier.create(result)
                 .expectNextMatches(issue2::equals)
                 .verifyComplete();
-        basicVerifyWebClient("/board/1/issue");
-        verify(responseSpec).onStatus(any(), any());
-        verify(responseSpec).bodyToMono(Issues.class);
+        verifyWebClientWithUriAndClass("/board/1/issue", Issues.class);
     }
 
     @Test
     void shouldFetchIssuesAndReturnFilteredIssueFluxByStatusIdAndPoint() {
-        Issue issue1 = buildIssueByStatus(10001, 1.0);
-        Issue issue2 = buildIssueByStatus(10001, 2.0);
-        Issue issue3 = buildIssueByStatus(10002, 2.0);
-        Issues issues = new Issues("issues", 0, 10, 1, List.of(issue1, issue2, issue3));
-
-        basicMockWebClient();
-        doReturn(responseSpec).when(responseSpec).onStatus(any(), any());
-        doReturn(Mono.just(issues)).when(responseSpec).bodyToMono(Issues.class);
+        Issue issue1 = buildCommonIssue(10001, 1.0, "");
+        Issue issue2 = buildCommonIssue(10001, 2.0, "");
+        Issue issue3 = buildCommonIssue(10002, 2.0, "");
+        Issues issues = buildIssuesByList(issue1, issue2, issue3);
+        mockWebClientAndReturnIssues(issues);
 
         Flux<Issue> result = issueService.findAllIssues(1, 10001, 2.0);
 
         StepVerifier.create(result)
                 .expectNextMatches(issue2::equals)
                 .verifyComplete();
-        basicVerifyWebClient("/board/1/issue");
-        verify(responseSpec).onStatus(any(), any());
-        verify(responseSpec).bodyToMono(Issues.class);
+        verifyWebClientWithUriAndClass("/board/1/issue", Issues.class);
     }
 
     @Test
     void shouldFetchErrorByInvalidBoardIdAndThrowException() {
-        basicMockWebClient();
+        mockWebClientBasically();
         doThrow(BoardNotFoundException.class).when(responseSpec).onStatus(any(), any());
 
         Throwable throwable = catchThrowable(() -> issueService.findAllIssues(1, -1, -1));
@@ -144,25 +124,20 @@ class IssueServiceTests {
 
     @Test
     void shouldFetchIssueAndReturnWhole() {
-        Issue issue = buildIssueByStatus(10001, 1.0);
-
-        basicMockWebClient();
-        doReturn(responseSpec).when(responseSpec).onStatus(any(), any());
-        doReturn(Mono.just(issue)).when(responseSpec).bodyToMono(Issue.class);
+        Issue issue = buildCommonIssue(10001, 1.0, "");
+        mockWebClientAndReturnSingleIssue(issue);
 
         Mono<Issue> result = issueService.findIssueById(issue.getId());
 
         StepVerifier.create(result)
                 .expectNextMatches(issue::equals)
                 .verifyComplete();
-        basicVerifyWebClient("/issue/" + issue.getId());
-        verify(responseSpec).onStatus(any(), any());
-        verify(responseSpec).bodyToMono(Issue.class);
+        verifyWebClientWithUriAndClass("/issue/" + issue.getId(), Issue.class);
     }
 
     @Test
     void shouldFetchErrorByInvalidIssueIdAndThrowException() {
-        basicMockWebClient();
+        mockWebClientBasically();
         doThrow(IssueNotFoundException.class).when(responseSpec).onStatus(any(), any());
 
         Throwable throwable = catchThrowable(() -> issueService.findIssueById(1));
@@ -174,70 +149,52 @@ class IssueServiceTests {
 
     @Test
     void shouldFetchIssueAndReturnCommentsPage() {
-        Issue issue = buildIssueByStatus(10001, 1.0);
+        Issue issue = buildCommonIssue(10001, 1.0, "");
         CommentDetail commentDetail = new CommentDetail(1, "example.com", "my comment",
                 true, Instant.EPOCH, Instant.EPOCH, new User(), new User());
         issue.getFields().setComment(new Comment(List.of(commentDetail)));
-
-        basicMockWebClient();
-        doReturn(responseSpec).when(responseSpec).onStatus(any(), any());
-        doReturn(Mono.just(issue)).when(responseSpec).bodyToMono(Issue.class);
+        mockWebClientAndReturnSingleIssue(issue);
 
         Flux<CommentDetail> result = issueService.findIssueCommentsById(issue.getId(), 5, 1);
 
         StepVerifier.create(result)
                 .expectNextMatches(commentDetail::equals)
                 .verifyComplete();
-        basicVerifyWebClient("/issue/" + issue.getId());
-        verify(responseSpec).onStatus(any(), any());
-        verify(responseSpec).bodyToMono(Issue.class);
+        verifyWebClientWithUriAndClass("/issue/" + issue.getId(), Issue.class);
     }
 
     @Test
     void shouldHandleInvalidPageSizeAndPageNum() {
-        Issue issue = buildIssueByStatus(10001, 1.0);
+        Issue issue = buildCommonIssue(10001, 1.0, "");
         issue.getFields().setComment(new Comment(List.of(new CommentDetail(), new CommentDetail())));
-
-        basicMockWebClient();
-        doReturn(responseSpec).when(responseSpec).onStatus(any(), any());
-        doReturn(Mono.just(issue)).when(responseSpec).bodyToMono(Issue.class);
+        mockWebClientAndReturnSingleIssue(issue);
 
         assertDoesNotThrow(() -> issueService.findIssueCommentsById(issue.getId(), -1, -1));
     }
 
     @Test
     void shouldFetchIssuesAndFilterWithLabel() {
-        Issue issue1 = buildIssueByStatus(1001, 1.0);
-        issue1.getFields().setLabels(List.of("empty"));
-        Issue issue2 = buildIssueByStatus(1001, 1.0);
-        issue2.getFields().setLabels(List.of("test"));
-        Issues issues = new Issues("issues", 0, 10, 1, List.of(issue1, issue2));
-
-        basicMockWebClient();
-        doReturn(responseSpec).when(responseSpec).onStatus(any(), any());
-        doReturn(Mono.just(issues)).when(responseSpec).bodyToMono(Issues.class);
+        Issue issue1 = buildCommonIssue(1001, 1.0, "empty");
+        Issue issue2 = buildCommonIssue(1001, 1.0, "test");
+        Issues issues = buildIssuesByList(issue1, issue2);
+        mockWebClientAndReturnIssues(issues);
 
         Flux<Issue> result = issueService.findIssuesByLabel(1, "test");
 
         StepVerifier.create(result)
                 .expectNextMatches(issue2::equals)
                 .verifyComplete();
-        basicVerifyWebClient("/board/1/issue");
-        verify(responseSpec).onStatus(any(), any());
-        verify(responseSpec).bodyToMono(Issues.class);
+        verifyWebClientWithUriAndClass("/board/1/issue", Issues.class);
     }
 
     @Test
     void shouldFetchIssuesAndFilterWithDays() {
-        Issue issue1 = buildIssueByStatus(10001, 1.0);
+        Issue issue1 = buildCommonIssue(10001, 1.0, "");
         issue1.getFields().setUpdated(Instant.now().minus(Period.ofDays(1)));
-        Issue issue2 = buildIssueByStatus(10001, 1.0);
+        Issue issue2 = buildCommonIssue(10001, 1.0, "");
         issue2.getFields().setUpdated(Instant.now());
-        Issues issues = new Issues("issues", 0, 10, 1, List.of(issue1, issue2));
-
-        basicMockWebClient();
-        doReturn(responseSpec).when(responseSpec).onStatus(any(), any());
-        doReturn(Mono.just(issues)).when(responseSpec).bodyToMono(Issues.class);
+        Issues issues = buildIssuesByList(issue1, issue2);
+        mockWebClientAndReturnIssues(issues);
 
         Flux<Issue> result1 = issueService.findRecentIssues(1, 1);
         Flux<Issue> result2 = issueService.findRecentIssues(1, 2);
@@ -249,27 +206,46 @@ class IssueServiceTests {
                 .expectNextMatches(issue2::equals)
                 .expectNextMatches(issue1::equals)
                 .verifyComplete();
-        basicVerifyWebClient("/board/1/issue");
-        verify(responseSpec, atLeastOnce()).onStatus(any(), any());
-        verify(responseSpec, atLeastOnce()).bodyToMono(Issues.class);
+        verifyWebClientWithUriAndClass("/board/1/issue", Issues.class);
     }
 
-    private Issue buildIssueByStatus(int statusId, double point) {
-        Status status = new Status();
-        status.setId(statusId);
-        Fields fields = Fields.builder().status(status).storyPoint(point).build();
-        return new Issue("issue", 1, "issue1", "web", fields);
+    private void mockWebClientAndReturnIssues(Issues issues) {
+        mockWebClientBasically();
+        doReturn(responseSpec).when(responseSpec).onStatus(any(), any());
+        doReturn(Mono.just(issues)).when(responseSpec).bodyToMono(Issues.class);
     }
 
-    private void basicMockWebClient() {
-        doReturn(requestHeadersUriSpec).when(webClient).get();
-        doReturn(requestHeadersSpec).when(requestHeadersUriSpec).uri(anyString());
-        doReturn(responseSpec).when(requestHeadersSpec).retrieve();
+    private void mockWebClientAndReturnSingleIssue(Issue issue) {
+        mockWebClientBasically();
+        doReturn(responseSpec).when(responseSpec).onStatus(any(), any());
+        doReturn(Mono.just(issue)).when(responseSpec).bodyToMono(Issue.class);
     }
 
-    private void basicVerifyWebClient(String uri) {
+    private <T> void verifyWebClientWithUriAndClass(String uri, Class<T> type) {
         verify(webClient, atLeastOnce()).get();
         verify(requestHeadersUriSpec, atLeastOnce()).uri(uri);
         verify(requestHeadersSpec, atLeastOnce()).retrieve();
+        verify(responseSpec, atLeastOnce()).onStatus(any(), any());
+        verify(responseSpec, atLeastOnce()).bodyToMono(type);
+    }
+
+    private Issues buildIssuesByList(Issue ...issues) {
+        return new Issues("issues", 0, issues.length, issues.length, List.of(issues));
+    }
+
+    private Issue buildCommonIssue(int statusId, double storyPoint, String label) {
+        Status status = new Status();
+        status.setId(statusId);
+        Fields fields = Fields.builder()
+                .status(status)
+                .storyPoint(storyPoint)
+                .labels(List.of(label)).build();
+        return new Issue("issue", 1, "issue1", "web", fields);
+    }
+
+    private void mockWebClientBasically() {
+        doReturn(requestHeadersUriSpec).when(webClient).get();
+        doReturn(requestHeadersSpec).when(requestHeadersUriSpec).uri(anyString());
+        doReturn(responseSpec).when(requestHeadersSpec).retrieve();
     }
 }
