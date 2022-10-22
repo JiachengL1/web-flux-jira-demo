@@ -17,6 +17,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -124,5 +125,18 @@ class IssueControllerTests {
                 .hasSize(1)
                 .contains(issue);
         verify(issueService).findRecentIssues(1, 10);
+    }
+
+    @Test
+    void shouldReturnErrorWhenRequestWithInvalidParams() {
+        webTestClient.get()
+                .uri("http://localhost:8080/issues/{id}/comments?pageSize={size}&pageNum={num}", 1, 0, -1)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(String.class)
+                .value(message -> {
+                    assertThat(message).contains("getIssueCommentsById.pageSize");
+                    assertThat(message).contains("getIssueCommentsById.pageNum");
+                });
     }
 }

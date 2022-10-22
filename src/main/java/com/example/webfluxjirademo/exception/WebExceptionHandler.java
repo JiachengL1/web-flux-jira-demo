@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import reactor.core.publisher.Mono;
 
+import javax.validation.ConstraintViolationException;
+
 @Slf4j
 @RestControllerAdvice
 public class WebExceptionHandler {
@@ -23,6 +25,14 @@ public class WebExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Mono<String> handleIssueNotFoundException(IssueNotFoundException exception) {
         String message = "Invalid issue id!";
+        log.error(message, exception);
+        return Mono.just(message);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Mono<String> handleConstraintViolationException(ConstraintViolationException exception) {
+        String message = exception.getMessage();
         log.error(message, exception);
         return Mono.just(message);
     }

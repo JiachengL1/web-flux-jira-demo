@@ -3,6 +3,7 @@ package com.example.webfluxjirademo.controller;
 import com.example.webfluxjirademo.domain.comment.CommentDetail;
 import com.example.webfluxjirademo.domain.issue.Issue;
 import com.example.webfluxjirademo.service.IssueService;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,11 +12,14 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.validation.constraints.Min;
+
 import static com.example.webfluxjirademo.util.Constants.DEFAULT_PAGE_NUM_STR;
 import static com.example.webfluxjirademo.util.Constants.DEFAULT_PAGE_SIZE_STR;
 import static com.example.webfluxjirademo.util.Constants.DEFAULT_STATUS_ID_STR;
 import static com.example.webfluxjirademo.util.Constants.DEFAULT_STORY_POINT_STR;
 
+@Validated
 @RestController
 @RequestMapping("/issues")
 public class IssueController {
@@ -42,8 +46,8 @@ public class IssueController {
     @GetMapping("/{id}/comments")
     public Flux<CommentDetail> getIssueCommentsById(
             @PathVariable("id") int id,
-            @RequestParam(value = "pageSize", defaultValue = DEFAULT_PAGE_SIZE_STR) int pageSize,
-            @RequestParam(value = "pageNum", defaultValue = DEFAULT_PAGE_NUM_STR) int pageNum) {
+            @RequestParam(value = "pageSize", defaultValue = DEFAULT_PAGE_SIZE_STR) @Min(1) int pageSize,
+            @RequestParam(value = "pageNum", defaultValue = DEFAULT_PAGE_NUM_STR) @Min(1) int pageNum) {
         return issueService.findIssueCommentsById(id, pageSize, pageNum);
     }
 

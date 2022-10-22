@@ -28,7 +28,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
@@ -161,15 +160,6 @@ class IssueServiceTests {
                 .expectNextMatches(commentDetail::equals)
                 .verifyComplete();
         verifyWebClientWithUriAndClass("/issue/" + issue.getId(), Issue.class);
-    }
-
-    @Test
-    void shouldHandleInvalidPageSizeAndPageNum() {
-        Issue issue = buildCommonIssue(10001, 1.0, "");
-        issue.getFields().setComment(new Comment(List.of(new CommentDetail(), new CommentDetail())));
-        mockWebClientAndReturnSingleIssue(issue);
-
-        assertDoesNotThrow(() -> issueService.findIssueCommentsById(issue.getId(), -1, -1));
     }
 
     @Test

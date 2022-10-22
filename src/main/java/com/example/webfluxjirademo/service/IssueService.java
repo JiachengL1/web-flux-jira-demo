@@ -14,8 +14,6 @@ import reactor.core.publisher.Mono;
 import java.time.Instant;
 import java.time.Period;
 
-import static com.example.webfluxjirademo.util.Constants.DEFAULT_PAGE_NUM;
-import static com.example.webfluxjirademo.util.Constants.DEFAULT_PAGE_SIZE;
 import static com.example.webfluxjirademo.util.Constants.DEFAULT_STATUS_ID;
 import static com.example.webfluxjirademo.util.Constants.DEFAULT_STORY_POINT;
 
@@ -48,9 +46,6 @@ public class IssueService {
     }
 
     public Flux<CommentDetail> findIssueCommentsById(int id, int pageSize, int pageNum) {
-        pageSize = pageSize > 0 ? pageSize : DEFAULT_PAGE_SIZE;
-        pageNum = pageNum > 0 ? pageNum : DEFAULT_PAGE_NUM;
-
         return findIssueById(id)
                 .flatMapMany(issue -> Flux.fromIterable(issue.getFields().getComment().getComments()))
                 .skip((long) (pageNum - 1) * pageSize)
