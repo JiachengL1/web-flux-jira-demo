@@ -17,7 +17,6 @@ import org.springframework.web.reactive.function.client.WebClient.RequestHeaders
 import org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
 import java.util.List;
 
@@ -65,9 +64,7 @@ class BoardServiceTests {
 
         Flux<Board> result = boardService.findAllBoards();
 
-        StepVerifier.create(result)
-                .expectNextMatches(new Board()::equals)
-                .verifyComplete();
+        result.subscribe(res -> assertThat(res).isEqualTo(new Board()));
         verify(requestHeadersUriSpec).uri("/board");
         verify(responseSpec).bodyToMono(Boards.class);
     }
@@ -81,9 +78,7 @@ class BoardServiceTests {
 
         Mono<Board> result = boardService.findBoardById(board.getId());
 
-        StepVerifier.create(result)
-                .expectNextMatches(board::equals)
-                .verifyComplete();
+        result.subscribe(res -> assertThat(res).isEqualTo(board));
         verify(requestHeadersUriSpec).uri("/board/" + board.getId());
         verify(responseSpec).onStatus(any(), any());
         verify(responseSpec).bodyToMono(Board.class);

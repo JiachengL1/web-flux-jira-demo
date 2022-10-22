@@ -22,7 +22,6 @@ import org.springframework.web.reactive.function.client.WebClient.RequestHeaders
 import org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
 import java.time.Instant;
 import java.time.Period;
@@ -69,14 +68,13 @@ class IssueServiceTests {
     @Test
     void shouldFetchIssuesByBoardIdAndReturnIssueFlux() {
         Issues issues = buildIssuesByList(new Issue());
+
         doReturn(responseSpec).when(responseSpec).onStatus(any(), any());
         doReturn(Mono.just(issues)).when(responseSpec).bodyToMono(Issues.class);
 
         Flux<Issue> result = issueService.findAllIssues(1, -1, -1);
 
-        StepVerifier.create(result)
-                .expectNextMatches(new Issue()::equals)
-                .verifyComplete();
+        result.subscribe(res -> assertThat(res).isEqualTo(new Issue()));
         verify(requestHeadersUriSpec, atLeastOnce()).uri("/board/1/issue");
         verify(responseSpec, atLeastOnce()).bodyToMono(Issues.class);
     }
@@ -86,14 +84,13 @@ class IssueServiceTests {
         Issue issueInProgress = buildCommonIssue(10001, 1.0, "");
         Issue issueDone = buildCommonIssue(10002, 1.0, "");
         Issues issues = buildIssuesByList(issueInProgress, issueDone);
+
         doReturn(responseSpec).when(responseSpec).onStatus(any(), any());
         doReturn(Mono.just(issues)).when(responseSpec).bodyToMono(Issues.class);
 
         Flux<Issue> result = issueService.findAllIssues(1, 10002, -1);
 
-        StepVerifier.create(result)
-                .expectNextMatches(issueDone::equals)
-                .verifyComplete();
+        result.subscribe(res -> assertThat(res).isEqualTo(issueDone));
         verify(requestHeadersUriSpec, atLeastOnce()).uri("/board/1/issue");
         verify(responseSpec, atLeastOnce()).bodyToMono(Issues.class);
     }
@@ -103,14 +100,13 @@ class IssueServiceTests {
         Issue onePointIssue = buildCommonIssue(10001, 1.0, "");
         Issue twoPointsIssue = buildCommonIssue(10001, 2.0, "");
         Issues issues = buildIssuesByList(onePointIssue, twoPointsIssue);
+
         doReturn(responseSpec).when(responseSpec).onStatus(any(), any());
         doReturn(Mono.just(issues)).when(responseSpec).bodyToMono(Issues.class);
 
         Flux<Issue> result = issueService.findAllIssues(1, -1, 2.0);
 
-        StepVerifier.create(result)
-                .expectNextMatches(twoPointsIssue::equals)
-                .verifyComplete();
+        result.subscribe(res -> assertThat(res).isEqualTo(twoPointsIssue));
         verify(requestHeadersUriSpec, atLeastOnce()).uri("/board/1/issue");
         verify(responseSpec, atLeastOnce()).bodyToMono(Issues.class);
     }
@@ -121,14 +117,13 @@ class IssueServiceTests {
         Issue issueCondition1And2 = buildCommonIssue(10001, 2.0, "");
         Issue issueCondition2 = buildCommonIssue(10002, 2.0, "");
         Issues issues = buildIssuesByList(issueCondition1, issueCondition1And2, issueCondition2);
+
         doReturn(responseSpec).when(responseSpec).onStatus(any(), any());
         doReturn(Mono.just(issues)).when(responseSpec).bodyToMono(Issues.class);
 
         Flux<Issue> result = issueService.findAllIssues(1, 10001, 2.0);
 
-        StepVerifier.create(result)
-                .expectNextMatches(issueCondition1And2::equals)
-                .verifyComplete();
+        result.subscribe(res -> assertThat(res).isEqualTo(issueCondition1And2));
         verify(requestHeadersUriSpec, atLeastOnce()).uri("/board/1/issue");
         verify(responseSpec, atLeastOnce()).bodyToMono(Issues.class);
     }
@@ -147,14 +142,13 @@ class IssueServiceTests {
     @Test
     void shouldFetchIssueAndReturnWhole() {
         Issue issue = buildCommonIssue(10001, 1.0, "");
+
         doReturn(responseSpec).when(responseSpec).onStatus(any(), any());
         doReturn(Mono.just(issue)).when(responseSpec).bodyToMono(Issue.class);
 
         Mono<Issue> result = issueService.findIssueById(issue.getId());
 
-        StepVerifier.create(result)
-                .expectNextMatches(issue::equals)
-                .verifyComplete();
+        result.subscribe(res -> assertThat(res).isEqualTo(issue));
         verify(requestHeadersUriSpec, atLeastOnce()).uri("/issue/" + issue.getId());
         verify(responseSpec, atLeastOnce()).bodyToMono(Issue.class);
     }
@@ -176,14 +170,13 @@ class IssueServiceTests {
         CommentDetail commentDetail = new CommentDetail(1, "example.com", "my comment",
                 true, Instant.EPOCH, Instant.EPOCH, new User(), new User());
         issue.getFields().setComment(new Comment(List.of(commentDetail)));
+
         doReturn(responseSpec).when(responseSpec).onStatus(any(), any());
         doReturn(Mono.just(issue)).when(responseSpec).bodyToMono(Issue.class);
 
         Flux<CommentDetail> result = issueService.findIssueCommentsById(issue.getId(), 5, 1);
 
-        StepVerifier.create(result)
-                .expectNextMatches(commentDetail::equals)
-                .verifyComplete();
+        result.subscribe(res -> assertThat(res).isEqualTo(commentDetail));
         verify(requestHeadersUriSpec, atLeastOnce()).uri("/issue/" + issue.getId());
         verify(responseSpec, atLeastOnce()).bodyToMono(Issue.class);
     }
@@ -193,19 +186,16 @@ class IssueServiceTests {
         Issue emptyIssue = buildCommonIssue(1001, 1.0, "empty");
         Issue testIssue = buildCommonIssue(1001, 1.0, "test");
         Issues issues = buildIssuesByList(emptyIssue, testIssue);
+
         doReturn(responseSpec).when(responseSpec).onStatus(any(), any());
         doReturn(Mono.just(issues)).when(responseSpec).bodyToMono(Issues.class);
 
         Flux<Issue> testResult = issueService.findIssuesByLabel(1, "test");
         Flux<Issue> allResult = issueService.findIssuesByLabel(1, " ");
 
-        StepVerifier.create(testResult)
-                .expectNextMatches(testIssue::equals)
-                .verifyComplete();
-        StepVerifier.create(allResult)
-                .expectNextMatches(emptyIssue::equals)
-                .expectNextMatches(testIssue::equals)
-                .verifyComplete();
+        testResult.subscribe(testRes -> assertThat(testRes).isEqualTo(testIssue));
+        allResult.subscribe(allRes -> assertThat(allRes).isEqualTo(emptyIssue));
+        allResult.subscribe(allRes -> assertThat(allRes).isEqualTo(testIssue));
         verify(requestHeadersUriSpec, atLeastOnce()).uri("/board/1/issue");
         verify(responseSpec, atLeastOnce()).bodyToMono(Issues.class);
     }
@@ -217,19 +207,16 @@ class IssueServiceTests {
         Issue issueNow = buildCommonIssue(10001, 1.0, "");
         issueNow.getFields().setUpdated(Instant.now());
         Issues issues = buildIssuesByList(issueLastDay, issueNow);
+
         doReturn(responseSpec).when(responseSpec).onStatus(any(), any());
         doReturn(Mono.just(issues)).when(responseSpec).bodyToMono(Issues.class);
 
         Flux<Issue> resultIn1Day = issueService.findRecentIssues(1, 1);
         Flux<Issue> resultIn2Days = issueService.findRecentIssues(1, 2);
 
-        StepVerifier.create(resultIn1Day)
-                .expectNextMatches(issueNow::equals)
-                .verifyComplete();
-        StepVerifier.create(resultIn2Days)
-                .expectNextMatches(issueNow::equals)
-                .expectNextMatches(issueLastDay::equals)
-                .verifyComplete();
+        resultIn1Day.subscribe(res -> assertThat(res).isEqualTo(issueNow));
+        resultIn2Days.subscribe(res -> assertThat(res).isEqualTo(issueNow));
+        resultIn2Days.subscribe(res -> assertThat(res).isEqualTo(issueLastDay));
         verify(requestHeadersUriSpec, atLeastOnce()).uri("/board/1/issue");
         verify(responseSpec, atLeastOnce()).bodyToMono(Issues.class);
     }
