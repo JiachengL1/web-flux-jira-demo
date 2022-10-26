@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -23,6 +24,7 @@ class WebExceptionHandlerTests {
     private IssueController issueController;
 
     @Test
+    @WithMockUser
     void shouldThrowBoardNotFoundExceptionAndReturnMessage() {
         when(boardController.getBoardById(anyInt())).thenThrow(new BoardNotFoundException());
 
@@ -36,6 +38,7 @@ class WebExceptionHandlerTests {
     }
 
     @Test
+    @WithMockUser
     void shouldThrowIssueNotFoundExceptionAndReturnMessage() {
         when(issueController.getIssueById(anyInt())).thenThrow(new IssueNotFoundException());
 

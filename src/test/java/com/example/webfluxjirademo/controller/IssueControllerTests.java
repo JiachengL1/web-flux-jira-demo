@@ -11,6 +11,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -41,6 +42,7 @@ class IssueControllerTests {
     }
 
     @Test
+    @WithMockUser
     void shouldGetAllIssuesWhenRequestWithDefaultStatusIdAndPoint() {
         when(issueService.findAllIssues(issue.getId(), -1, -1)).thenReturn(Flux.just(issue));
 
@@ -55,6 +57,7 @@ class IssueControllerTests {
     }
 
     @Test
+    @WithMockUser
     void shouldGetIssuesWhenRequestWithSpecificStatusIdAndPoint() {
         when(issueService.findAllIssues(issue.getId(), 10001, 1.0)).thenReturn(Flux.just(issue));
 
@@ -70,6 +73,7 @@ class IssueControllerTests {
     }
 
     @Test
+    @WithMockUser
     void shouldGetSpecificIssueWhenRequestWithId() {
         when(issueService.findIssueById(issue.getId())).thenReturn(Mono.just(issue));
 
@@ -83,6 +87,7 @@ class IssueControllerTests {
     }
 
     @Test
+    @WithMockUser
     void shouldGetCommentsPageWhenRequestWithId() {
         CommentDetail commentDetail = new CommentDetail(1, "example.com", "my comment",
                 true, null, null, new User(), new User());
@@ -99,6 +104,7 @@ class IssueControllerTests {
     }
 
     @Test
+    @WithMockUser
     void shouldGetIssuesWhenRequestWithBoardIdAndLabel() {
         issue.getFields().setLabels(List.of("test"));
         when(issueService.findIssuesByLabel(1, "test")).thenReturn(Flux.just(issue));
@@ -114,6 +120,7 @@ class IssueControllerTests {
     }
 
     @Test
+    @WithMockUser
     void shouldGetRecentIssuesWhenRequestWithBoardIdAndDays() {
         when(issueService.findRecentIssues(1, 10)).thenReturn(Flux.just(issue));
 
@@ -128,6 +135,7 @@ class IssueControllerTests {
     }
 
     @Test
+    @WithMockUser
     void shouldReturnErrorWhenRequestWithInvalidParams() {
         webTestClient.get()
                 .uri("http://localhost:8080/issues/{id}/comments?pageSize={size}&pageNum={num}", 1, 0, -1)
