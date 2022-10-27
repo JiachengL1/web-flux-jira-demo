@@ -9,6 +9,7 @@ import com.example.webfluxjirademo.domain.issue.Issues;
 import com.example.webfluxjirademo.domain.status.Status;
 import com.example.webfluxjirademo.exception.BoardNotFoundException;
 import com.example.webfluxjirademo.exception.IssueNotFoundException;
+import com.example.webfluxjirademo.util.WebClientUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,6 +44,8 @@ class IssueServiceTests {
     @InjectMocks
     private IssueService issueService;
     @Mock
+    private WebClientUtil webClientUtil;
+    @Mock
     private WebClient webClient;
     @Mock
     private RequestHeadersUriSpec<?> requestHeadersUriSpec;
@@ -53,6 +56,7 @@ class IssueServiceTests {
 
     @BeforeEach
     void setUp() {
+        doReturn(webClient).when(webClientUtil).getWebClient();
         doReturn(requestHeadersUriSpec).when(webClient).get();
         doReturn(requestHeadersSpec).when(requestHeadersUriSpec).uri(anyString());
         doReturn(responseSpec).when(requestHeadersSpec).retrieve();
@@ -60,6 +64,7 @@ class IssueServiceTests {
 
     @AfterEach
     void tearDown() {
+        verify(webClientUtil, atLeastOnce()).getWebClient();
         verify(webClient, atLeastOnce()).get();
         verify(requestHeadersSpec, atLeastOnce()).retrieve();
         verify(responseSpec, atLeastOnce()).onStatus(any(), any());

@@ -5,9 +5,9 @@ import com.example.webfluxjirademo.domain.issue.Issue;
 import com.example.webfluxjirademo.domain.issue.Issues;
 import com.example.webfluxjirademo.exception.BoardNotFoundException;
 import com.example.webfluxjirademo.exception.IssueNotFoundException;
+import com.example.webfluxjirademo.util.WebClientUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -20,15 +20,15 @@ import static com.example.webfluxjirademo.util.Constants.DEFAULT_STORY_POINT;
 @Service
 public class IssueService {
 
-    private final WebClient webClient;
+    private final WebClientUtil webClientUtil;
 
-    public IssueService(WebClient webClient) {
-        this.webClient = webClient;
+    public IssueService(WebClientUtil webClientUtil) {
+        this.webClientUtil = webClientUtil;
     }
 
     public Flux<Issue> findAllIssues(int boardId, int statusId, double point) {
-        return webClient.get()
-                .uri(String.format("/board/%d/issue", boardId))
+        return webClientUtil.getWebClient()
+                .get().uri(String.format("/board/%d/issue", boardId))
                 .retrieve()
                 .onStatus(HttpStatus::is4xxClientError, response -> Mono.error(BoardNotFoundException::new))
                 .bodyToMono(Issues.class)
@@ -38,8 +38,8 @@ public class IssueService {
     }
 
     public Mono<Issue> findIssueById(int id) {
-        return webClient.get()
-                .uri("/issue/" + id)
+        return webClientUtil.getWebClient()
+                .get().uri("/issue/" + id)
                 .retrieve()
                 .onStatus(HttpStatus::is4xxClientError, response -> Mono.error(IssueNotFoundException::new))
                 .bodyToMono(Issue.class);
