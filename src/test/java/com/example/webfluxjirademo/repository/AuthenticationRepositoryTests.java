@@ -4,6 +4,8 @@ import com.example.webfluxjirademo.domain.Authentication;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.autoconfigure.mongo.embedded.EmbeddedMongoAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -13,6 +15,7 @@ import reactor.core.publisher.Mono;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataMongoTest
+@ImportAutoConfiguration(exclude = EmbeddedMongoAutoConfiguration.class)
 class AuthenticationRepositoryTests {
 
     @Autowired
@@ -55,5 +58,14 @@ class AuthenticationRepositoryTests {
 
         Mono<Boolean> deleteResult = mongoTemplate.exists(query, Authentication.class, "authentications");
         assertThat(deleteResult.block()).isFalse();
+    }
+
+    @Test
+    void shouldFindAuthenticationByUsername() {
+        Mono<Authentication> returnResult = mongoTemplate.save(authentication, "authentications");
+        assertThat(returnResult.block()).isEqualTo(authentication);
+
+        Mono<Authentication> findResult = repository.findByUsername(authentication.getUsername());
+        assertThat(findResult.block()).isEqualTo(authentication);
     }
 }
