@@ -35,7 +35,8 @@ public class SecurityConfig {
     public SecurityConfig(AuthenticationSuccessHandler authenticationSuccessHandler,
                           AuthenticationFailureHandler authenticationFailureHandler,
                           LogoutSuccessHandler logoutSuccessHandler,
-                          SecurityContextRepository securityContextRepository, AuthenticationRepository authenticationRepository) {
+                          SecurityContextRepository securityContextRepository,
+                          AuthenticationRepository authenticationRepository) {
         this.authenticationSuccessHandler = authenticationSuccessHandler;
         this.authenticationFailureHandler = authenticationFailureHandler;
         this.logoutSuccessHandler = logoutSuccessHandler;

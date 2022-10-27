@@ -11,7 +11,7 @@ import org.springframework.security.web.server.authentication.ServerAuthenticati
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
-import java.util.Map;
+import java.util.Collections;
 import java.util.UUID;
 
 
@@ -38,6 +38,6 @@ public class AuthenticationSuccessHandler implements ServerAuthenticationSuccess
 
         return ResponseUtil.writeResponse(
                 webFilterExchange.getExchange().getResponse(),
-                Map.of("token", token));
+                Collections.singletonMap("token", token));
     }
 }

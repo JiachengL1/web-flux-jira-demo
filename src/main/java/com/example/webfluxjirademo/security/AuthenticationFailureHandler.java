@@ -8,7 +8,7 @@ import org.springframework.security.web.server.authentication.ServerAuthenticati
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
-import java.util.Map;
+import java.util.Collections;
 
 @Component
 public class AuthenticationFailureHandler implements ServerAuthenticationFailureHandler {
@@ -18,6 +18,6 @@ public class AuthenticationFailureHandler implements ServerAuthenticationFailure
     public Mono<Void> onAuthenticationFailure(WebFilterExchange webFilterExchange, AuthenticationException exception) {
         return ResponseUtil.writeResponse(
                 webFilterExchange.getExchange().getResponse(),
-                Map.of("message", "Login failed!"));
+                Collections.singletonMap("message", "Login failed!"));
     }
 }

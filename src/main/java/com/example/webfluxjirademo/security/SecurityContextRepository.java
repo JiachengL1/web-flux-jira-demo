@@ -1,6 +1,7 @@
 package com.example.webfluxjirademo.security;
 
 import com.example.webfluxjirademo.service.AuthenticationService;
+import io.netty.util.internal.StringUtil;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -28,7 +29,7 @@ public class SecurityContextRepository implements ServerSecurityContextRepositor
     @Override
     public Mono<SecurityContext> load(ServerWebExchange exchange) {
         String token = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-        if (token == null || token.isBlank()) {
+        if (StringUtil.isNullOrEmpty(token)) {
             return Mono.empty();
         }
 

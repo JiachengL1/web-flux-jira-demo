@@ -10,7 +10,7 @@ import org.springframework.security.web.server.authentication.logout.ServerLogou
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
-import java.util.Map;
+import java.util.Collections;
 
 @Component
 public class LogoutSuccessHandler implements ServerLogoutSuccessHandler {
@@ -32,6 +32,6 @@ public class LogoutSuccessHandler implements ServerLogoutSuccessHandler {
         webClientUtil.removeToken();
 
         return ResponseUtil.writeResponse(exchange.getExchange().getResponse(),
-                Map.of("message", "Logout success!"));
+                Collections.singletonMap("message", "Logout success!"));
     }
 }
