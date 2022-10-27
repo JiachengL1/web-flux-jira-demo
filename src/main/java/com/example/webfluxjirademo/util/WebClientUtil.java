@@ -47,6 +47,7 @@ public class WebClientUtil {
                 authentication.getUsername(),
                 authentication.getPassword()).getBytes();
 
-        return Base64.getEncoder().encodeToString(bytes);
+        String token = Base64.getEncoder().encodeToString(bytes);
+        return "Basic " + token;
     }
 }
